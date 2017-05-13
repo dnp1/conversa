@@ -13,7 +13,6 @@ import (
     "github.com/dnp1/conversa/server/mock_session"
     "github.com/dnp1/conversa/server/session"
     "github.com/twinj/uuid"
-    "fmt"
 )
 
 func init() {

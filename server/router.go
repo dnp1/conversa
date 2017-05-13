@@ -3,20 +3,27 @@ package server
 import (
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/dnp1/conversa/server/session"
+
+    "github.com/dnp1/conversa/server/user"
 )
 
 type RouterBuilder struct {
     Session session.Session
+    User user.User
 }
 
 func (rb * RouterBuilder) Build() *gin.Engine {
     sc := sessionController {
         Session: rb.Session,
     }
+    uc := usersController{
+        User: rb.User,
+    }
     r := gin.New()
     r.POST("/session", sc.Login)
     r.DELETE("/session", sc.Logout)
-    r.POST("/users", sc.CreateUser)
+
+    r.POST("/users", uc.CreateUser)
 
     auth := r.Group("/")
     auth.Use(AuthMiddleware)

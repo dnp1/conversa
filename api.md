@@ -8,7 +8,7 @@
 ##Public endpoints
 - [POST] /session -- login
 - [DELETE] /session -- logout
-- [POST] /sign-up -- create user
+- [POST] /users -- create user
 
 ##Endpoints behind "auth middleware"
 - [GET] /users/:id/rooms -- list user's rooms (joined and owned)

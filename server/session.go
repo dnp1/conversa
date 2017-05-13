@@ -63,6 +63,3 @@ func (sc *sessionController) Logout(c *gin.Context) {
     }
 }
 
-func (sc *sessionController) CreateUser(c *gin.Context) {
-    notImplemented(c)
-}
