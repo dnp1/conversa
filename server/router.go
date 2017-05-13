@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
     "github.com/gin-gonic/gin"
@@ -23,6 +23,6 @@ func NewRouter() *gin.Engine {
     auth.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
     auth.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
 
-    return nil
+    return r
 }
 
