@@ -13,21 +13,22 @@ type RouterBuilder struct {
 }
 
 func (rb * RouterBuilder) Build() *gin.Engine {
-    sc := sessionController {
+    sessionCtrl := SessionController{
         Session: rb.Session,
     }
-    uc := usersController{
+    usersController := UsersController{
         User: rb.User,
     }
+    authMiddleware := AuthenticationMiddleware{Session:rb.Session}
     r := gin.New()
-    r.POST("/session", sc.Login)
-    r.DELETE("/session", sc.Logout)
+    r.POST("/session", sessionCtrl.Login)
+    r.DELETE("/session", sessionCtrl.Logout)
 
-    r.POST("/users", uc.CreateUser)
+    r.POST("/users", usersController.CreateUser)
 
     auth := r.Group("/")
-    authMiddleware := AuthenticationMiddleware{Session:rb.Session}
     auth.Use(authMiddleware.AuthMiddleware)
+    auth.GET("/users", usersController)
     auth.GET("/users/:user/rooms", ListRooms)
     auth.GET("/users/:user/rooms/:room", RetrieveRoom)
     auth.POST("/users/:user/rooms", CreateRoom)

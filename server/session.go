@@ -8,7 +8,7 @@ import (
 
 const TokenCookieName = "AUTH_TOKEN"
 
-type sessionController struct {
+type SessionController struct {
     Session session.Session
 }
 
@@ -30,7 +30,7 @@ func deleteCookie(c *gin.Context, name string) {
     )
 }
 
-func (sc *sessionController) Login(c *gin.Context) {
+func (sc *SessionController) Login(c *gin.Context) {
     var body LoginBody
     if err := c.BindJSON(&body); err != nil {
         c.AbortWithError(http.StatusBadRequest, err)
@@ -50,7 +50,7 @@ func (sc *sessionController) Login(c *gin.Context) {
     }
 }
 
-func (sc *sessionController) Logout(c *gin.Context) {
+func (sc *SessionController) Logout(c *gin.Context) {
     if token, err := c.Cookie(TokenCookieName); err != nil {
         c.AbortWithError(http.StatusNoContent, err)
         return

@@ -15,6 +15,10 @@ import (
     "errors"
 )
 
+func init() {
+    gin.SetMode(gin.TestMode)
+}
+
 func TestSessionController_CreateUser(t *testing.T) {
     type Case struct {
         router *gin.Engine

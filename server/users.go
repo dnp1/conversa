@@ -6,7 +6,7 @@ import (
     "net/http"
 )
 
-type usersController struct {
+type UsersController struct {
     User user.User
 }
 
@@ -17,7 +17,7 @@ type CreateUser struct {
     PasswordConfirmation string `json:"passwordConfirmation"`
 }
 
-func (uc *usersController) CreateUser(c *gin.Context) {
+func (uc *UsersController) CreateUser(c *gin.Context) {
     var body CreateUser
     if err := c.BindJSON(&body); err != nil {
         c.AbortWithError(http.StatusBadRequest, err)
