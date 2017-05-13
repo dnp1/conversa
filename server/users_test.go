@@ -12,6 +12,7 @@ import (
     "github.com/dnp1/conversa/server/user"
     "github.com/golang/mock/gomock"
     "github.com/dnp1/conversa/server/mock_user"
+    "errors"
 )
 
 func TestSessionController_CreateUser(t *testing.T) {
@@ -57,6 +58,18 @@ func TestSessionController_CreateUser(t *testing.T) {
             }(),
             strings.NewReader(`{"username":"user", "password": "passphrase", "passwordConfirmation":"passphrase"}`),
             http.StatusConflict,
+        },
+        {
+            func() *gin.Engine {
+                u := mock_user.NewMockUser(mockCtrl)
+                u.EXPECT().Create("user", "passphrase","passphrase").Return(errors.New("Unexpected error!!!"))
+                rb := server.RouterBuilder{
+                    User:u,
+                }
+                return rb.Build()
+            }(),
+            strings.NewReader(`{"username":"user", "password": "passphrase", "passwordConfirmation":"passphrase"}`),
+            http.StatusInternalServerError,
         },
         {
             func() *gin.Engine {
