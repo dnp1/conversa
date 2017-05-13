@@ -9,7 +9,6 @@ import (
     "github.com/dnp1/conversa/server"
     "strings"
     "io"
-    "fmt"
     "gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -17,43 +16,44 @@ func init() {
     gin.SetMode(gin.TestMode)
 }
 
-//TestLogin0 cases that end in BadRequest
-func TestLogin0(t *testing.T) {
+func TestLogin(t *testing.T) {
+    type Case struct {
+        router *gin.Engine
+        body io.Reader
+        status int
+    }
 
-    router := server.NewRouter()
-    cases := [...]io.Reader {
-        nil,
-        strings.NewReader(`{"user_name": "json","password"}`),
-        strings.NewReader(fmt.Sprintf(
-            `{"username": "%s", "password": "passphrase"}`,
-            strings.Repeat("110111001011101111000100110101011110011011110", 10),
-        )),
-        strings.NewReader(fmt.Sprintf(
-            `{"username": "user", "password": "%s"}`,
-            strings.Repeat("110111001011abc101111000100110101011110011011110", 10),
-        )),
-        strings.NewReader(`{"username": "user", "password": "passphrase"}`),
+    cases := [...]Case {
+        {
+            server.NewRouter(),
+            strings.NewReader(""),
+            http.StatusBadRequest,
+        },
+        {
+            server.NewRouter(),
+            strings.NewReader(`{"user_name": "json","password"}`),
+            http.StatusBadRequest,
+        },
+        {
+            server.NewRouter(),
+            strings.NewReader(`{"username": "user", "password": "passphrase"}`),
+            http.StatusUnauthorized,
+        },
+        {
+            server.NewRouter(),
+            strings.NewReader(`{"username":"user", "password":"passphrase"}`),
+            http.StatusOK,
+        },
     }
     for i, c := range cases {
-        req, err := http.NewRequest("POST", "/session", c)
+        req, err := http.NewRequest("POST", "/session", c.body)
         if assert.NoError(t, err) {
             resp :=  httptest.NewRecorder()
-            router.ServeHTTP(resp, req)
-            if !assert.Exactly(t, http.StatusBadRequest, resp.Code){
-                t.Logf("Case %s", i)
+            c.router.ServeHTTP(resp, req)
+            if !assert.Exactly(t, c.status, resp.Code){
+                t.Logf("Case %d", i)
             }
         }
     }
 }
 
-//TestLogin0 cases that end in Ok
-func TestLogin1(t *testing.T) {
-    router := server.NewRouter()
-    body := strings.NewReader(`{"username":"user", "passwor":"passphrase"`)
-    req, err := http.NewRequest("POST", "/session", body)
-    if assert.NoError(t, err) {
-        resp :=  httptest.NewRecorder()
-        router.ServeHTTP(resp, req)
-        assert.Exactly(t, http.StatusOK, resp.Code)
-    }
-}
