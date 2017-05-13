@@ -125,7 +125,6 @@ func TestSessionController_Logout(t *testing.T) {
     for i, c := range cases {
         req, err := http.NewRequest("DELETE", "/session", strings.NewReader(""))
         if c.Cookie != nil {
-            fmt.Println("oidsfs")
             req.AddCookie(&http.Cookie{
                 Name: server.TokenCookieName,
                 Value: c.Cookie.String(),
