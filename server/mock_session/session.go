@@ -4,6 +4,7 @@
 package mock_session
 
 import (
+	session "github.com/dnp1/conversa/server/session"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -47,6 +48,17 @@ func (_m *MockSession) Delete(_param0 string) error {
 
 func (_mr *_MockSessionRecorder) Delete(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Delete", arg0)
+}
+
+func (_m *MockSession) Retrieve(_param0 string) (*session.Data, error) {
+	ret := _m.ctrl.Call(_m, "Retrieve", _param0)
+	ret0, _ := ret[0].(*session.Data)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockSessionRecorder) Retrieve(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Retrieve", arg0)
 }
 
 func (_m *MockSession) Valid(_param0 string) error {
