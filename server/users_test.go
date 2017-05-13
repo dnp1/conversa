@@ -16,11 +16,6 @@ import (
 )
 
 func TestSessionController_CreateUser(t *testing.T) {
-    ///cases:
-    //Malformed body
-    //Invalid content (json ok, but data not acceptable
-    //Already Existing username
-    //Ok
     type Case struct {
         router *gin.Engine
         body   io.Reader

@@ -11,6 +11,8 @@
 - [POST] /users -- create user
 
 ##Endpoints behind "auth middleware"
+- [GET] /rooms -- list existing rooms #TODO:implement it
+- [GET] /users -- list existing rooms #TODO:implement it
 - [GET] /users/:id/rooms -- list user's rooms (joined and owned)
 - [GET] /users/:id/rooms/:id -- retrieve user's room details
 - [POST] /users/:id/rooms-- create an user's room

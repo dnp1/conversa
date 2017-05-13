@@ -11,6 +11,7 @@ const TokenCookieName = "AUTH_TOKEN"
 type sessionController struct {
     Session session.Session
 }
+
 //LoginBody is used to parse Login's handler body
 type LoginBody struct {
     Username string `json:"username"`

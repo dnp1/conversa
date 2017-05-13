@@ -26,7 +26,8 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     r.POST("/users", uc.CreateUser)
 
     auth := r.Group("/")
-    auth.Use(AuthMiddleware)
+    authMiddleware := AuthenticationMiddleware{Session:rb.Session}
+    auth.Use(authMiddleware.AuthMiddleware)
     auth.GET("/users/:user/rooms", ListRooms)
     auth.GET("/users/:user/rooms/:room", RetrieveRoom)
     auth.POST("/users/:user/rooms", CreateRoom)

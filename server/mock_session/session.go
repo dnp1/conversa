@@ -48,3 +48,13 @@ func (_m *MockSession) Delete(_param0 string) error {
 func (_mr *_MockSessionRecorder) Delete(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Delete", arg0)
 }
+
+func (_m *MockSession) Valid(_param0 string) error {
+	ret := _m.ctrl.Call(_m, "Valid", _param0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockSessionRecorder) Valid(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Valid", arg0)
+}
