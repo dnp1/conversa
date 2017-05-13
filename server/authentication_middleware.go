@@ -12,7 +12,6 @@ type Authentication struct {
 }
 
 func (auth *Authentication) Middleware(c *gin.Context) {
-    //empty everything passing
     if token, err := c.Cookie(TokenCookieName); err != nil {
         c.AbortWithError(http.StatusBadRequest, err)
         return

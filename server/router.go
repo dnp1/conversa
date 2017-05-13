@@ -26,7 +26,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
 
     r.POST("/users", usersController.CreateUser)
 
-    authenticated := r.Group("/")
+    authenticated := r.Group("")
     authenticated.Use(authentication.Middleware)
     //auth.GET("/users", usersController.)
     authenticated.GET("/rooms", ListRooms)
@@ -36,7 +36,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     authenticated.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
     authenticated.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
 
-    authorized := authenticated.Group("/")
+    authorized := r.Group("")
     authorized.GET("/users/:user/rooms", ListUserRooms)
     authorized.POST("/users/:user/rooms", CreateRoom)
     authorized.DELETE("/users/:user/rooms/:room", DeleteRoom)
