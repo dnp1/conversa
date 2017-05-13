@@ -12,6 +12,7 @@ import (
     "github.com/golang/mock/gomock"
     "github.com/dnp1/conversa/server/mock_session"
     "github.com/dnp1/conversa/server/session"
+
     "github.com/twinj/uuid"
 )
 
@@ -80,10 +81,9 @@ func TestSessionController_Login(t *testing.T) {
 func TestSessionController_Logout(t *testing.T) {
     type Case struct {
         router *gin.Engine
-        Cookie uuid.UUID
         status int
     }
-    tokens := []uuid.UUID {
+    tokens := [...]uuid.UUID {
         nil,
         uuid.NewV4(),
         uuid.NewV4(),
@@ -93,7 +93,6 @@ func TestSessionController_Logout(t *testing.T) {
     cases := [...]Case{
         {
             server.NewRouter(),
-            tokens[0],
             http.StatusNoContent,
         },
         {
@@ -105,28 +104,26 @@ func TestSessionController_Logout(t *testing.T) {
                 }
                 return rb.Build()
             }(),
-            tokens[1],
             http.StatusResetContent,
         },
         {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Delete(tokens[1].String()).Return(nil)
+                s.EXPECT().Delete(tokens[2].String()).Return(nil)
                 rb := server.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
             }(),
-            tokens[1],
             http.StatusOK,
         },
     }
     for i, c := range cases {
         req, err := http.NewRequest("DELETE", "/session", strings.NewReader(""))
-        if c.Cookie != nil {
+        if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
                 Name: server.TokenCookieName,
-                Value: c.Cookie.String(),
+                Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,
                 HttpOnly: true,

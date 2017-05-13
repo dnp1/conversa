@@ -19,26 +19,28 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     usersController := UsersController{
         User: rb.User,
     }
-    authMiddleware := AuthenticationMiddleware{Session:rb.Session}
+    authentication := Authentication{Session:rb.Session}
     r := gin.New()
     r.POST("/session", sessionCtrl.Login)
     r.DELETE("/session", sessionCtrl.Logout)
 
     r.POST("/users", usersController.CreateUser)
 
-    auth := r.Group("/")
-    auth.Use(authMiddleware.AuthMiddleware)
-    auth.GET("/users", usersController)
-    auth.GET("/users/:user/rooms", ListRooms)
-    auth.GET("/users/:user/rooms/:room", RetrieveRoom)
-    auth.POST("/users/:user/rooms", CreateRoom)
-    auth.POST("/users/:user/rooms/:room", JoinRoom)
-    auth.DELETE("/users/:user/rooms/:room", LeaveRoom)
-    auth.PATCH("/users/:user/rooms/:room", EditRoom)
-    auth.GET("/users/:user/rooms/:room/messages", ListMessages)
-    auth.POST("/users/:user/rooms/:room/messages", CreateMessage)
-    auth.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
-    auth.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
+    lg := r.Group("/")
+    lg.Use(authentication.Middleware)
+    //auth.GET("/users", usersController.)
+    lg.GET("/rooms", ListRooms)
+
+    lg.GET("/users/:user/rooms/:room/messages", ListMessages)
+    lg.POST("/users/:user/rooms/:room/messages", CreateMessage)
+    lg.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
+    lg.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
+
+    authorized := lg.Group("/")
+    authorized.GET("/users/:user/rooms", ListUserRooms)
+    authorized.POST("/users/:user/rooms", CreateRoom)
+    authorized.DELETE("/users/:user/rooms/:room", DeleteRoom)
+    authorized.PATCH("/users/:user/rooms/:room", EditRoom)
 
     return r
 }
