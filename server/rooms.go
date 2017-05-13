@@ -1,8 +1,7 @@
 package server
 
-import (
-    "github.com/gin-gonic/gin"
-)
+import "gopkg.in/gin-gonic/gin.v1"
+
 func ListRooms(c *gin.Context) {
     notImplemented(c)
 }

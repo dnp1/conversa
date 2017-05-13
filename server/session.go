@@ -1,7 +1,9 @@
 package server
 
 import (
-    "github.com/gin-gonic/gin"
+
+    "net/http"
+    "gopkg.in/gin-gonic/gin.v1"
 )
 
 //LoginBody is used to parse Login's handler body
@@ -11,7 +13,13 @@ type LoginBody struct {
 }
 
 func Login(c *gin.Context) {
-    notImplemented(c)
+    body := new(LoginBody)
+    if err := c.BindJSON(&body); err != nil {
+        c.AbortWithStatus(http.StatusBadRequest)
+    } else {
+        notImplemented(c)
+    }
+
 }
 func Logout(c *gin.Context) {
     notImplemented(c)

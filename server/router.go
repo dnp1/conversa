@@ -1,8 +1,6 @@
 package server
 
-import (
-    "github.com/gin-gonic/gin"
-)
+import "gopkg.in/gin-gonic/gin.v1"
 
 func NewRouter() *gin.Engine {
     r := gin.New()
