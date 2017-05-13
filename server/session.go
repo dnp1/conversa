@@ -1,12 +1,12 @@
 package server
 
 import (
-
     "net/http"
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/dnp1/conversa/server/session"
-    "fmt"
 )
+
+const TokenCookieName = "AUTH_TOKEN"
 
 type sessionController struct {
     Session session.Session
@@ -17,18 +17,29 @@ type LoginBody struct {
     Password string `json:"password"`
 }
 
+func deleteCookie(c *gin.Context, name string) {
+    c.SetCookie(
+        name,
+        "deleted",
+        -1,
+        "",
+        "",
+        true,
+        true,
+    )
+}
+
 func (sc *sessionController) Login(c *gin.Context) {
     var body LoginBody
     if err := c.BindJSON(&body); err != nil {
         c.AbortWithError(http.StatusBadRequest, err)
-        fmt.Println("oi!")
     } else if key, err := sc.Session.Create(body.Username, body.Password); err != nil {
         c.AbortWithError(http.StatusUnauthorized, err)
     } else {
         c.SetCookie(
-            "AUTH_TOKEN",
+            TokenCookieName,
             key,
-            24*60*60,
+            24 * 60 * 60,
             "",
             "",
             true,
@@ -39,8 +50,19 @@ func (sc *sessionController) Login(c *gin.Context) {
 }
 
 func (sc *sessionController) Logout(c *gin.Context) {
-    notImplemented(c)
+    if token, err := c.Cookie(TokenCookieName); err != nil {
+        c.AbortWithError(http.StatusNoContent, err)
+        return
+    } else {
+        if err := sc.Session.Delete(token); err != nil {
+            c.Status(http.StatusResetContent)
+        } else {
+            c.Status(http.StatusOK)
+        }
+        deleteCookie(c, TokenCookieName)
+    }
 }
+
 func (sc *sessionController) CreateUser(c *gin.Context) {
     notImplemented(c)
 }

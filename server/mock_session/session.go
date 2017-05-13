@@ -38,3 +38,13 @@ func (_m *MockSession) Create(_param0 string, _param1 string) (string, error) {
 func (_mr *_MockSessionRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Create", arg0, arg1)
 }
+
+func (_m *MockSession) Delete(_param0 string) error {
+	ret := _m.ctrl.Call(_m, "Delete", _param0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockSessionRecorder) Delete(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Delete", arg0)
+}
