@@ -1,12 +1,22 @@
 package server
 
-import "gopkg.in/gin-gonic/gin.v1"
+import (
+    "gopkg.in/gin-gonic/gin.v1"
+    "github.com/dnp1/conversa/server/session"
+)
 
-func NewRouter() *gin.Engine {
+type RouterBuilder struct {
+    Session session.Session
+}
+
+func (rb * RouterBuilder) Build() *gin.Engine {
+    sc := sessionController {
+        Session: rb.Session,
+    }
     r := gin.New()
-    r.POST("/session", Login)
-    r.DELETE("/session", Logout)
-    r.POST("/sign-up", CreateUser)
+    r.POST("/session", sc.Login)
+    r.DELETE("/session", sc.Logout)
+    r.POST("/users", sc.CreateUser)
 
     auth := r.Group("/")
     auth.Use(AuthMiddleware)
@@ -22,5 +32,13 @@ func NewRouter() *gin.Engine {
     auth.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
 
     return r
+}
+
+
+func NewRouter() *gin.Engine {
+    builder := RouterBuilder{
+        Session: session.New(),
+    }
+    return builder.Build()
 }
 

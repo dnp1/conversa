@@ -4,26 +4,43 @@ import (
 
     "net/http"
     "gopkg.in/gin-gonic/gin.v1"
+    "github.com/dnp1/conversa/server/session"
+    "fmt"
 )
 
+type sessionController struct {
+    Session session.Session
+}
 //LoginBody is used to parse Login's handler body
 type LoginBody struct {
-    Username [255]byte `json:"username"`
-    Password [255]byte `json:"password"`
+    Username string `json:"username"`
+    Password string `json:"password"`
 }
 
-func Login(c *gin.Context) {
-    body := new(LoginBody)
+func (sc *sessionController) Login(c *gin.Context) {
+    var body LoginBody
     if err := c.BindJSON(&body); err != nil {
-        c.AbortWithStatus(http.StatusBadRequest)
+        c.AbortWithError(http.StatusBadRequest, err)
+        fmt.Println("oi!")
+    } else if key, err := sc.Session.Create(body.Username, body.Password); err != nil {
+        c.AbortWithError(http.StatusUnauthorized, err)
     } else {
-        notImplemented(c)
+        c.SetCookie(
+            "AUTH_TOKEN",
+            key,
+            24*60*60,
+            "",
+            "",
+            true,
+            true,
+        )
+        c.Status(http.StatusOK)
     }
-
 }
-func Logout(c *gin.Context) {
+
+func (sc *sessionController) Logout(c *gin.Context) {
     notImplemented(c)
 }
-func CreateUser(c *gin.Context) {
+func (sc *sessionController) CreateUser(c *gin.Context) {
     notImplemented(c)
 }

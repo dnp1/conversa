@@ -2,7 +2,6 @@ package server_test
 
 import (
     "testing"
-
     "net/http/httptest"
     "net/http"
     "github.com/stretchr/testify/assert"
@@ -10,6 +9,9 @@ import (
     "strings"
     "io"
     "gopkg.in/gin-gonic/gin.v1"
+    "github.com/golang/mock/gomock"
+    "github.com/dnp1/conversa/server/mock_session"
+    "github.com/dnp1/conversa/server/session"
 )
 
 func init() {
@@ -23,6 +25,9 @@ func TestLogin(t *testing.T) {
         status int
     }
 
+    mockCtrl := gomock.NewController(t)
+    defer mockCtrl.Finish()
+
     cases := [...]Case {
         {
             server.NewRouter(),
@@ -35,12 +40,26 @@ func TestLogin(t *testing.T) {
             http.StatusBadRequest,
         },
         {
-            server.NewRouter(),
-            strings.NewReader(`{"username": "user", "password": "passphrase"}`),
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Create("user", "password").Return("", session.ErrBadCredentials)
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
+            }(),
+            strings.NewReader(`{"username": "user", "password": "password"}`),
             http.StatusUnauthorized,
         },
         {
-            server.NewRouter(),
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Create("user", "passphrase").Return("my token!!!", nil)
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
+            }(),
             strings.NewReader(`{"username":"user", "password":"passphrase"}`),
             http.StatusOK,
         },
@@ -50,7 +69,7 @@ func TestLogin(t *testing.T) {
         if assert.NoError(t, err) {
             resp :=  httptest.NewRecorder()
             c.router.ServeHTTP(resp, req)
-            if !assert.Exactly(t, c.status, resp.Code){
+            if !assert.Exactly(t, c.status, resp.Code) {
                 t.Logf("Case %d", i)
             }
         }
