@@ -14,6 +14,7 @@ var (
 )
 
 type Data struct {
+    UserID int64
     Username string
 }
 
@@ -70,10 +71,35 @@ func (s *session) Delete(token string) error {
 }
 
 func (s *session) Valid(token string) error {
+    var exists bool;
+    const query = `SELECT true FROM "user_session" WHERE session_key = $1`
+    if err := s.db.QueryRow(query, token).Scan(&exists); err != nil {
+        if err == sql.ErrNoRows {
+            return  ErrTokenNotFound
+        } else {
+            return err
+        }
+    } else if !exists {
+        return  ErrTokenNotFound
+    }
     return nil
 }
 
 func (s *session) Retrieve(token string) (*Data, error) {
-    return nil, nil
+    var data Data
+
+    const query = `SELECT u.username, s.user_id
+        FROM "user_session" s
+        INNER JOIN "user" u ON s."user_id" = u."id"
+ WHERE session_key = $1
+        `
+    if err := s.db.QueryRow(query, token).Scan(&data.Username, &data.UserID); err != nil {
+        if err == sql.ErrNoRows {
+            return  nil, ErrTokenNotFound
+        } else {
+            return nil, err
+        }
+    }
+    return &data, nil
 }
 
