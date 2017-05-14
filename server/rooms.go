@@ -34,8 +34,10 @@ func (rc *RoomController) CreateRoom(c *gin.Context) {
     var body CreateRoom
     if err := c.BindJSON(&body); err != nil {
         c.AbortWithError(http.StatusBadRequest, err)
-    } else if err := rc.Room.Create(c.Param("user"), body.Name); err != nil {
+    } else if err := rc.Room.Create(c.Param("user"), body.Name); err == room.ErrRoomNameAlreadyExists {
         c.AbortWithError(http.StatusConflict, err)
+    } else if err != nil {
+        c.AbortWithError(http.StatusInternalServerError, err)
     } else {
         c.Status(http.StatusOK)
     }

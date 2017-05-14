@@ -19,8 +19,10 @@ CREATE TABLE user_session (
 CREATE TABLE room(
     "id" serial PRIMARY KEY ,
     "user_id" INT REFERENCES "user"("id") NOT NULL,
-    "user_name" VARCHAR(255) REFERENCES "user"("username") NOT NULL,
+    "username" VARCHAR(255) REFERENCES "user"("username") NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    CONSTRAINT "uq_name" UNIQUE("user_name", "name")
+    CONSTRAINT "uq_name" UNIQUE("username", "name")
 );
+
+
 

@@ -16,6 +16,7 @@ import (
     "fmt"
     "github.com/dnp1/conversa/server/mock_room"
     "github.com/dnp1/conversa/server/room"
+    "github.com/pkg/errors"
 )
 
 func init() {
@@ -35,6 +36,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
 
     tokens := [...]uuid.UUID{
         nil,
+        uuid.NewV4(),
         uuid.NewV4(),
         uuid.NewV4(),
         uuid.NewV4(),
@@ -95,7 +97,24 @@ func TestRoomController_CreateRoom(t *testing.T) {
                 r := mock_room.NewMockRoom(mockCtrl)
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[4].String()).Return(sessionData, nil)
-                r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrCouldNotInsert)
+                r.EXPECT().Create(sessionData.Username, "golang").Return(errors.New("Unexpected error"))
+                rb := server.RouterBuilder{
+                    Session:s,
+                    Room:r,
+                }
+                return rb.Build()
+            }(),
+            "dnp1",
+            strings.NewReader(bodyExample),
+            http.StatusInternalServerError,
+        },
+        {//couldn't insert
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                r := mock_room.NewMockRoom(mockCtrl)
+                sessionData := &session.Data{Username:"dnp1"}
+                s.EXPECT().Retrieve(tokens[5].String()).Return(sessionData, nil)
+                r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrRoomNameAlreadyExists)
                 rb := server.RouterBuilder{
                     Session:s,
                     Room:r,
@@ -111,7 +130,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
                 sessionData := &session.Data{Username:"dnp1"}
-                s.EXPECT().Retrieve(tokens[5].String()).Return(sessionData, nil)
+                s.EXPECT().Retrieve(tokens[6].String()).Return(sessionData, nil)
                 r.EXPECT().Create(sessionData.Username, "golang").Return(nil)
                 rb := server.RouterBuilder{
                     Session:s,

@@ -44,6 +44,7 @@ func TestSession_Create(t *testing.T) {
     mock.ExpectExec(".*").WithArgs(sqlmock.AnyArg(), 1).WillReturnResult(sqlmock.NewResult(1, 1))
     _, err = s.Create(username, password)
     assert.NoError(t, err)
+    assert.NoError(t, mock.ExpectationsWereMet())
 }
 
 func TestSession_Delete(t *testing.T) {
@@ -60,6 +61,7 @@ func TestSession_Delete(t *testing.T) {
     token = uuid.NewV4().String()
     mock.ExpectExec(".*").WillReturnResult(sqlmock.NewResult(1, 1))
     assert.NoError(t, s.Delete(token))
+    assert.NoError(t, mock.ExpectationsWereMet())
 }
 
 func TestSession_Valid(t *testing.T) {
@@ -92,6 +94,7 @@ func TestSession_Valid(t *testing.T) {
     rows.AddRow(true)
     mock.ExpectQuery(".*").WillReturnRows(rows)
     assert.NoError(t, s.Valid(token))
+    assert.NoError(t, mock.ExpectationsWereMet())
 
 }
 
@@ -127,5 +130,5 @@ func TestSession_Retrieve(t *testing.T) {
     data, err = s.Retrieve(token)
     assert.Nil(t, err)
     assert.NotNil(t, data)
-
+    assert.NoError(t, mock.ExpectationsWereMet())
 }

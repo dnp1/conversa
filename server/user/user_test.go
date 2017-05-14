@@ -31,5 +31,6 @@ func TestUser_Create(t *testing.T) {
     //ok
     mock.ExpectQuery(".*").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1)).WithArgs("user", sqlmock.AnyArg())
     assert.NoError(t, u.Create("user", pass, pass))
+    assert.NoError(t, mock.ExpectationsWereMet())
 
 }
