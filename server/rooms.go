@@ -18,11 +18,6 @@ func ListUserRooms(c *gin.Context) {
     notImplemented(c)
 }
 
-func RetrieveRoom(c *gin.Context) {
-    notImplemented(c)
-}
-
-
 type CreateRoom struct {
     Name string `json:"name"`
 }
@@ -36,9 +31,7 @@ func (rc *RoomController) CreateRoom(c *gin.Context) {
         c.Status(http.StatusOK)
     }
 }
-func JoinRoom(c *gin.Context) {
-    notImplemented(c)
-}
+
 func DeleteRoom(c *gin.Context) {
     notImplemented(c)
 }

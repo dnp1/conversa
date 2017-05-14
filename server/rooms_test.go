@@ -22,7 +22,7 @@ func init() {
     gin.SetMode(gin.TestMode)
 }
 
-func TestCreateRoom(t *testing.T) {
+func TestRoomController_CreateRoom(t *testing.T) {
     type Case struct {
         router *gin.Engine
         user   string
