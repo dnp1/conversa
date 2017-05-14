@@ -42,6 +42,7 @@ type room struct {
 }
 
 func (r *room) Create(username string, name string) error {
+    //TODO:validate roomname with a regexp
     const query = `INSERT INTO "room"("name", "username", "user_id")
         SELECT $1, $2, u.id FROM "user" u WHERE u."username" = $2
         ON CONFLICT ON CONSTRAINT "uq_username" DO NOTHING RETURNING id;

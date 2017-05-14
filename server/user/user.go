@@ -38,6 +38,7 @@ type user struct {
 }
 
 func (u *user) Create(username string, password string, passwordConfirmation string) error {
+    //TODO:validate username with a regexp
     if password != passwordConfirmation {
         return ErrPasswordConfirmationDoesNotMatch
     }
