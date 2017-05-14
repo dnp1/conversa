@@ -62,6 +62,10 @@ func (s *session) Create(username string, password string) (string, error) {
 }
 
 func (s *session) Delete(token string) error {
+    const query = `DELETE FROM "user_session" WHERE session_key = $1`
+    if _, err := s.db.Exec(query, token); err != nil {
+        return err
+    }
     return nil
 }
 

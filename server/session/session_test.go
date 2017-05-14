@@ -8,6 +8,7 @@ import (
     "github.com/stretchr/testify/assert"
     "errors"
     "golang.org/x/crypto/bcrypt"
+    "github.com/satori/go.uuid"
 )
 
 func TestSession_Create(t *testing.T) {
@@ -43,4 +44,20 @@ func TestSession_Create(t *testing.T) {
     mock.ExpectExec(".*").WithArgs(sqlmock.AnyArg(), 1).WillReturnResult(sqlmock.NewResult(1,1))
     _, err = s.Create(username, password)
     assert.NoError(t, err)
+}
+
+
+func TestSession_Delete(t *testing.T) {
+    db, mock, err := sqlmock.New()
+    assert.NoError(t, err)
+    s := session.Builder{DB:db}.Build()
+
+    //case 0
+    token := uuid.NewV4().String()
+    mock.ExpectExec(".*").WillReturnError(errors.New("unexpected error"))
+    s.Delete(token)
+    //case 1
+    token = uuid.NewV4().String()
+    mock.ExpectExec(".*").WillReturnResult(sqlmock.NewResult(1,1))
+    s.Delete(token)
 }
