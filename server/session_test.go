@@ -14,6 +14,7 @@ import (
     "github.com/dnp1/conversa/server/session"
 
     "github.com/twinj/uuid"
+    "github.com/pkg/errors"
 )
 
 func init() {
@@ -40,6 +41,18 @@ func TestSessionController_Login(t *testing.T) {
             server.NewRouter(nil),
             strings.NewReader(`{"user_name": "json","password"}`),
             http.StatusBadRequest,
+        },
+        {
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Create("user", "password").Return("", errors.New("Unexpected!"))
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
+            }(),
+            strings.NewReader(`{"username": "user", "password": "password"}`),
+            http.StatusInternalServerError,
         },
         {
             func() *gin.Engine {

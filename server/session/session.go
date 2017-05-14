@@ -4,6 +4,8 @@ import (
     "github.com/pkg/errors"
     "database/sql"
     "github.com/jmoiron/sqlx"
+    "golang.org/x/crypto/bcrypt"
+    "github.com/satori/go.uuid"
 )
 
 var (
@@ -36,8 +38,27 @@ type session struct {
     db *sqlx.DB
 }
 
-func (s *session) Create(username string, password string) (token string, err error) {
-    return "", nil
+func (s *session) Create(username string, password string) (string, error) {
+    var (
+        hashedPassword string
+        userID int64
+    )
+    const selQuery = `SELECT password, user_id FROM "user" WHERE username = $1;`
+    if err := s.db.QueryRow(selQuery, username).Scan(&hashedPassword, &userID); err == sql.ErrNoRows {
+        return "", ErrBadCredentials
+    } else if err != nil {
+        return "", err
+    } else  if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
+        return "", ErrBadCredentials
+    }
+
+    key := uuid.NewV4().String()
+    const insQuery = `INSERT INTO "user_session"("session_key", "user_id") VALUES($1, $2);`
+    if _, err := s.db.Exec(insQuery, key, userID); err != nil {
+        return "", err
+    }
+
+    return key, nil
 }
 
 func (s *session) Delete(token string) error {

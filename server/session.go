@@ -34,8 +34,10 @@ func (sc *SessionController) Login(c *gin.Context) {
     var body LoginBody
     if err := c.BindJSON(&body); err != nil {
         c.AbortWithError(http.StatusBadRequest, err)
-    } else if key, err := sc.Session.Create(body.Username, body.Password); err != nil {
+    } else if key, err := sc.Session.Create(body.Username, body.Password); err == session.ErrBadCredentials {
         c.AbortWithError(http.StatusUnauthorized, err)
+    } else if err!=nil{
+        c.AbortWithError(http.StatusInternalServerError, err)
     } else {
         c.SetCookie(
             TokenCookieName,
