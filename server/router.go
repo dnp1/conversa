@@ -36,13 +36,14 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     authentication := Authentication{Session:rb.Session}
     authenticated.Use(authentication.Middleware)
     //auth.GET("/users", usersController.)
-    authenticated.GET("/rooms", ListRooms)
-
-    authenticated.GET("/users/:user/rooms/:room/messages", ListMessages)
-    authenticated.POST("/users/:user/rooms/:room/messages", CreateMessage)
-    authenticated.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
-    authenticated.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
+    authenticated.GET("/rooms", roomCtrl.ListRooms)
     authenticated.GET("/users/:user/rooms", ListUserRooms)
+
+    //authenticated.GET("/users/:user/rooms/:room/messages", ListMessages)
+    //authenticated.POST("/users/:user/rooms/:room/messages", CreateMessage)
+    //authenticated.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
+    //authenticated.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
+
 
     authorized := r.Group("")
     authorization := Authorization{Session:rb.Session}

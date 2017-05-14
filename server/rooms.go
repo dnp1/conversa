@@ -10,7 +10,7 @@ type RoomController struct {
     Room room.Room
 }
 
-func ListRooms(c *gin.Context) {
+func (rc *RoomController) ListRooms(c *gin.Context) {
     notImplemented(c)
 }
 
@@ -21,6 +21,7 @@ func ListUserRooms(c *gin.Context) {
 type CreateRoom struct {
     Name string `json:"name"`
 }
+
 func (rc *RoomController) CreateRoom(c *gin.Context) {
     var body CreateRoom
     if err := c.BindJSON(&body); err != nil {

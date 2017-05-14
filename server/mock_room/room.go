@@ -4,6 +4,7 @@
 package mock_room
 
 import (
+	room "github.com/dnp1/conversa/server/room"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -26,6 +27,28 @@ func NewMockRoom(ctrl *gomock.Controller) *MockRoom {
 
 func (_m *MockRoom) EXPECT() *_MockRoomRecorder {
 	return _m.recorder
+}
+
+func (_m *MockRoom) All() ([]room.Data, error) {
+	ret := _m.ctrl.Call(_m, "All")
+	ret0, _ := ret[0].([]room.Data)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockRoomRecorder) All() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "All")
+}
+
+func (_m *MockRoom) AllByUser(_param0 string) ([]room.Data, error) {
+	ret := _m.ctrl.Call(_m, "AllByUser", _param0)
+	ret0, _ := ret[0].([]room.Data)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockRoomRecorder) AllByUser(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "AllByUser", arg0)
 }
 
 func (_m *MockRoom) Create(_param0 string, _param1 string) error {
