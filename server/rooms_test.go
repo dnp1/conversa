@@ -435,7 +435,7 @@ func TestRoomController_ListRooms(t *testing.T) {
             }(),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusConflict,
+            http.StatusInternalServerError,
         },
         {//Everything ok
             func() *gin.Engine {
