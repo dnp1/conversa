@@ -47,3 +47,13 @@ func (_m *MockRoom) Delete(_param0 string, _param1 string) error {
 func (_mr *_MockRoomRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Delete", arg0, arg1)
 }
+
+func (_m *MockRoom) Rename(_param0 string, _param1 string, _param2 string) error {
+	ret := _m.ctrl.Call(_m, "Rename", _param0, _param1, _param2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockRoomRecorder) Rename(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Rename", arg0, arg1, arg2)
+}
