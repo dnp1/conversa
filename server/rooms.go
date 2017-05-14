@@ -33,8 +33,13 @@ func (rc *RoomController) CreateRoom(c *gin.Context) {
 }
 
 func (rc *RoomController) DeleteRoom(c *gin.Context) {
-    notImplemented(c)
+    if err := rc.Room.Delete(c.Param("user"), c.Param("room")); err != nil {
+        c.AbortWithError(http.StatusConflict, err)
+    } else {
+        c.Status(http.StatusOK)
+    }
 }
+
 func EditRoom(c *gin.Context) {
     notImplemented(c)
 }
