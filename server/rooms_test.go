@@ -476,3 +476,101 @@ func TestRoomController_ListRooms(t *testing.T) {
         }
     }
 }
+
+
+func TestRoomController_ListUserRooms(t *testing.T) {
+    type Case struct {
+        router *gin.Engine
+        user   string
+        body   io.Reader
+        status int
+    }
+
+    mockCtrl := gomock.NewController(t)
+    defer mockCtrl.Finish()
+
+    tokens := [...]uuid.UUID{
+        nil,
+        uuid.NewV4(),
+        uuid.NewV4(),
+        uuid.NewV4(),
+    }
+
+    const userName = "korra"
+    const roomName = "golang"
+    const bodyExample = `{"name":"`+ roomName +`"}`
+    cases := []Case{
+        {//no token
+            server.NewRouter(),
+            "dnp1",
+            strings.NewReader(bodyExample),
+            http.StatusBadRequest,
+        },
+        {//invalid token
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Valid(tokens[1].String()).Return(session.ErrTokenNotFound)
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
+            }(),
+            "dnp1",
+            strings.NewReader(bodyExample),
+            http.StatusUnauthorized,
+        },
+        {//Db'failure
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                r := mock_room.NewMockRoom(mockCtrl)
+                s.EXPECT().Valid(tokens[2].String()).Return(nil)
+                r.EXPECT().AllByUser(userName).Return(nil, room.ErrCouldNotRetrieveRooms)
+                rb := server.RouterBuilder{
+                    Session:s,
+                    Room:r,
+                }
+                return rb.Build()
+            }(),
+            "dnp1",
+            strings.NewReader(bodyExample),
+            http.StatusInternalServerError,
+        },
+        {//Everything ok
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                r := mock_room.NewMockRoom(mockCtrl)
+                s.EXPECT().Valid(tokens[3].String()).Return(nil)
+                r.EXPECT().AllByUser(userName).Return([]room.Data{}, nil)
+                rb := server.RouterBuilder{
+                    Session:s,
+                    Room:r,
+                }
+                return rb.Build()
+            }(),
+            "dnp1",
+            strings.NewReader(bodyExample),
+            http.StatusOK,
+        },
+    }
+
+    for i, c := range cases {
+        url := fmt.Sprintf("/users/%s/rooms", userName)
+        req, err := http.NewRequest("GET", url, nil)
+        if tokens[i] != nil {
+            req.AddCookie(&http.Cookie{
+                Name: server.TokenCookieName,
+                Value: tokens[i].String(),
+                MaxAge: 24 * 60 * 60,
+                Secure: true,
+                HttpOnly: true,
+            })
+        }
+        if assert.NoError(t, err) {
+            resp := httptest.NewRecorder()
+            c.router.ServeHTTP(resp, req)
+            if !assert.Exactly(t, c.status, resp.Code) {
+                t.Logf("Case %d", i)
+            }
+        }
+    }
+}
