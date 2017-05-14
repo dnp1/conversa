@@ -41,5 +41,12 @@ func (rc *RoomController) DeleteRoom(c *gin.Context) {
 }
 
 func (rc *RoomController) EditRoom(c *gin.Context) {
-    notImplemented(c)
+    var body CreateRoom
+    if err := c.BindJSON(&body); err != nil {
+        c.AbortWithError(http.StatusBadRequest, err)
+    } else if err := rc.Room.Rename(c.Param("user"), c.Param("room"), body.Name); err != nil {
+        c.AbortWithError(http.StatusConflict, err)
+    } else {
+        c.Status(http.StatusOK)
+    }
 }
