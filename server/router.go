@@ -5,11 +5,13 @@ import (
     "github.com/dnp1/conversa/server/session"
 
     "github.com/dnp1/conversa/server/user"
+    "github.com/dnp1/conversa/server/room"
 )
 
 type RouterBuilder struct {
     Session session.Session
     User user.User
+    Room room.Room
 }
 
 func (rb * RouterBuilder) Build() *gin.Engine {
@@ -19,7 +21,8 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     usersController := UsersController{
         User: rb.User,
     }
-    authentication := Authentication{Session:rb.Session}
+
+
     r := gin.New()
     r.POST("/session", sessionCtrl.Login)
     r.DELETE("/session", sessionCtrl.Logout)
@@ -27,6 +30,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     r.POST("/users", usersController.CreateUser)
 
     authenticated := r.Group("")
+    authentication := Authentication{Session:rb.Session}
     authenticated.Use(authentication.Middleware)
     //auth.GET("/users", usersController.)
     authenticated.GET("/rooms", ListRooms)
@@ -35,9 +39,11 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     authenticated.POST("/users/:user/rooms/:room/messages", CreateMessage)
     authenticated.PATCH("/users/:user/rooms/:room/messages/:message", EditMessage)
     authenticated.DELETE("/users/:user/rooms/:room/messages/:message", DeleteMessage)
+    authenticated.GET("/users/:user/rooms", ListUserRooms)
 
     authorized := r.Group("")
-    authorized.GET("/users/:user/rooms", ListUserRooms)
+    authorization := Authorization{Session:rb.Session}
+    authorized.Use(authorization.Middleware)
     authorized.POST("/users/:user/rooms", CreateRoom)
     authorized.DELETE("/users/:user/rooms/:room", DeleteRoom)
     authorized.PATCH("/users/:user/rooms/:room", EditRoom)
@@ -49,6 +55,8 @@ func (rb * RouterBuilder) Build() *gin.Engine {
 func NewRouter() *gin.Engine {
     builder := RouterBuilder{
         Session: session.New(),
+        User: user.New(),
+        Room: room.New(),
     }
     return builder.Build()
 }

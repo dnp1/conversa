@@ -13,6 +13,9 @@ import (
     "github.com/twinj/uuid"
     "github.com/dnp1/conversa/server/mock_session"
     "github.com/dnp1/conversa/server/session"
+    "fmt"
+    "github.com/dnp1/conversa/server/mock_room"
+    "github.com/dnp1/conversa/server/room"
 )
 
 func init() {
@@ -49,34 +52,72 @@ func TestCreateRoom(t *testing.T) {
         {//invalid token
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Valid(tokens[1].String()).Return(session.ErrTokenNotFound)
-                r := routerForAuthenticationTest(s)
-                return r
+                s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
             }(),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusUnauthorized,
         },
         {//trying create room to other user
-            server.NewRouter(),
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Retrieve(tokens[2].String()).Return(nil, session.ErrTokenNotFound)
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
+            }(),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusUnauthorized,
         },
         {//wrong json
-            server.NewRouter(),
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username:"dnp1"}, nil)
+                rb := server.RouterBuilder{
+                    Session:s,
+                }
+                return rb.Build()
+            }(),
             "dnp1",
             strings.NewReader(`{"name":"golang",`),
             http.StatusBadRequest,
         },
         {//couldn't insert
-            server.NewRouter(),
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                r := mock_room.NewMockRoom(mockCtrl)
+                sessionData := &session.Data{Username:"dnp1"}
+                s.EXPECT().Retrieve(tokens[3].String()).Return(sessionData, nil)
+                r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrCouldNotInsert)
+                rb := server.RouterBuilder{
+                    Session:s,
+                    Room:r,
+                }
+                return rb.Build()
+            }(),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusBadRequest,
         },
         {//Everything ok
-            server.NewRouter(),
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                r := mock_room.NewMockRoom(mockCtrl)
+                sessionData := &session.Data{Username:"dnp1"}
+                s.EXPECT().Retrieve(tokens[3].String()).Return(sessionData, nil)
+                r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrCouldNotInsert)
+                rb := server.RouterBuilder{
+                    Session:s,
+                    Room:r,
+                }
+                return rb.Build()
+            }(),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusOK,
@@ -84,7 +125,8 @@ func TestCreateRoom(t *testing.T) {
     }
 
     for i, c := range cases {
-        req, err := http.NewRequest("DELETE", "/session", strings.NewReader(""))
+        url := fmt.Sprintf("/users/%s/rooms", c.user)
+        req, err := http.NewRequest("POST", url, strings.NewReader(""))
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
                 Name: server.TokenCookieName,
