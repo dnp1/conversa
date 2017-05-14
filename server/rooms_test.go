@@ -45,7 +45,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
     const bodyExample = `{"name":"golang"}`
     cases := []Case{
         {//no token
-            server.NewRouter(),
+            server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusBadRequest,
@@ -169,7 +169,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
     const roomName = "golang"
     cases := []Case{
         {//no token
-            server.NewRouter(),
+            server.NewRouter(nil),
             "dnp1",
             http.StatusBadRequest,
         },
@@ -279,7 +279,7 @@ func TestRoomController_EditRoom(t *testing.T) {
     const bodyExample = `{"name":"`+ newRoomName +`"}`
     cases := []Case{
         {//no token
-            server.NewRouter(),
+            server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusBadRequest,
@@ -403,7 +403,7 @@ func TestRoomController_ListRooms(t *testing.T) {
     const bodyExample = `{"name":"`+ RoomName +`"}`
     cases := []Case{
         {//no token
-            server.NewRouter(),
+            server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusBadRequest,
@@ -501,7 +501,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
     const bodyExample = `{"name":"`+ roomName +`"}`
     cases := []Case{
         {//no token
-            server.NewRouter(),
+            server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusBadRequest,

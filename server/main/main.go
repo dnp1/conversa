@@ -7,6 +7,8 @@ import (
     "net/http"
     "os"
     "github.com/dnp1/conversa/server"
+    _ "github.com/lib/pq"
+    "database/sql"
 )
 
 func env(key string, defaultVal string) string {
@@ -23,6 +25,11 @@ func init() {
 }
 
 func main() {
+    db, err := sql.Open("postgres", os.Getenv("DB_CONN_STR"))
+    if err != nil {
+        log.Fatal(err)
+    }
+
     host := env("HOST", "0.0.0.0")
     port := env("PORT", "5001")
     srv := &http.Server{
@@ -31,7 +38,7 @@ func main() {
         WriteTimeout: 60 * time.Second,
         ReadHeaderTimeout: 10 * time.Second,
         MaxHeaderBytes: 1 << 11,
-        Handler: server.NewRouter(),
+        Handler: server.NewRouter(db),
     }
 
     if err := srv.ListenAndServe(); err != nil {

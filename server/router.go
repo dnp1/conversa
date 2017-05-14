@@ -6,15 +6,17 @@ import (
 
     "github.com/dnp1/conversa/server/user"
     "github.com/dnp1/conversa/server/room"
+    "database/sql"
 )
 
 type RouterBuilder struct {
+    db      *sql.DB
     Session session.Session
-    User user.User
-    Room room.Room
+    User    user.User
+    Room    room.Room
 }
 
-func (rb * RouterBuilder) Build() *gin.Engine {
+func (rb *RouterBuilder) Build() *gin.Engine {
     sessionCtrl := SessionController{
         Session: rb.Session,
     }
@@ -24,7 +26,6 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     roomCtrl := RoomController{
         Room: rb.Room,
     }
-
 
     r := gin.New()
     r.POST("/session", sessionCtrl.Login)
@@ -55,12 +56,11 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     return r
 }
 
-
-func NewRouter() *gin.Engine {
+func NewRouter(db *sql.DB) *gin.Engine {
     builder := RouterBuilder{
-        Session: session.New(),
-        User: user.New(),
-        Room: room.New(),
+        Session: session.Builder{DB:db}.Build(),
+        User: user.Builder{DB:db}.Build(),
+        Room: room.Builder{DB:db}.Build(),
     }
     return builder.Build()
 }

@@ -32,12 +32,12 @@ func TestSessionController_Login(t *testing.T) {
 
     cases := [...]Case{
         {
-            server.NewRouter(),
+            server.NewRouter(nil),
             strings.NewReader(""),
             http.StatusBadRequest,
         },
         {
-            server.NewRouter(),
+            server.NewRouter(nil),
             strings.NewReader(`{"user_name": "json","password"}`),
             http.StatusBadRequest,
         },
@@ -92,7 +92,7 @@ func TestSessionController_Logout(t *testing.T) {
     defer mockCtrl.Finish()
     cases := [...]Case{
         {
-            server.NewRouter(),
+            server.NewRouter(nil),
             http.StatusNoContent,
         },
         {

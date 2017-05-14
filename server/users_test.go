@@ -30,7 +30,7 @@ func TestSessionController_CreateUser(t *testing.T) {
     defer mockCtrl.Finish()
     cases := [...]Case {
         {
-            server.NewRouter(),
+            server.NewRouter(nil),
             strings.NewReader(`{"user":sdasdas "`),
             http.StatusBadRequest,
         },

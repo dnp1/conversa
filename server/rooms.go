@@ -19,7 +19,11 @@ func (rc *RoomController) ListRooms(c *gin.Context) {
 }
 
 func (rc *RoomController) ListUserRooms(c *gin.Context) {
-    notImplemented(c)
+    if data, err := rc.Room.AllByUser(c.Param("user")); err != nil{
+        c.AbortWithError(http.StatusInternalServerError, err)
+    } else {
+        c.JSON(http.StatusOK, data)
+    }
 }
 
 type CreateRoom struct {
