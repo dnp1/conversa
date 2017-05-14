@@ -32,7 +32,7 @@ func (rc *RoomController) CreateRoom(c *gin.Context) {
     }
 }
 
-func DeleteRoom(c *gin.Context) {
+func (rc *RoomController) DeleteRoom(c *gin.Context) {
     notImplemented(c)
 }
 func EditRoom(c *gin.Context) {
