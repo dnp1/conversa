@@ -4,7 +4,8 @@ SET client_min_messages TO INFO;
 
 CREATE TABLE "user" (
     "id" serial PRIMARY KEY,
-    "username" VARCHAR(255) UNIQUE,
+    "username" VARCHAR(255),
+    CONSTRAINT "uq_username" UNIQUE("username"),
     "password" TEXT NOT NULL,
     registration_datetime TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
 );
