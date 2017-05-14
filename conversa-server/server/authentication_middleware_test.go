@@ -8,8 +8,8 @@ import (
     "net/http"
     "github.com/dnp1/conversa/conversa-server/server"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/server/session"
-    "github.com/dnp1/conversa/conversa-server/server/mock_session"
+    "github.com/dnp1/conversa/conversa-server/session"
+    "github.com/dnp1/conversa/conversa-server/mock_session"
     "github.com/twinj/uuid"
     "errors"
 )

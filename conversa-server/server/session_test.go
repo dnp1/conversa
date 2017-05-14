@@ -10,8 +10,8 @@ import (
     "io"
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/server/mock_session"
-    "github.com/dnp1/conversa/conversa-server/server/session"
+    "github.com/dnp1/conversa/conversa-server/mock_session"
+    "github.com/dnp1/conversa/conversa-server/session"
 
     "github.com/twinj/uuid"
     "github.com/pkg/errors"

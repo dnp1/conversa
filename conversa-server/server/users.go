@@ -2,7 +2,7 @@ package server
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/conversa-server/server/user"
+    "github.com/dnp1/conversa/conversa-server/user"
     "net/http"
 )
 

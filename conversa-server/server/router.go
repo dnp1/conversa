@@ -2,9 +2,9 @@ package server
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/conversa-server/server/session"
-    "github.com/dnp1/conversa/conversa-server/server/user"
-    "github.com/dnp1/conversa/conversa-server/server/room"
+    "github.com/dnp1/conversa/conversa-server/session"
+    "github.com/dnp1/conversa/conversa-server/user"
+    "github.com/dnp1/conversa/conversa-server/room"
     "database/sql"
 )
 

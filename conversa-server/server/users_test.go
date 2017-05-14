@@ -9,9 +9,9 @@ import (
     "net/http"
     "github.com/dnp1/conversa/conversa-server/server"
     "strings"
-    "github.com/dnp1/conversa/conversa-server/server/user"
+    "github.com/dnp1/conversa/conversa-server/user"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/server/mock_user"
+    "github.com/dnp1/conversa/conversa-server/mock_user"
     "errors"
 )
 

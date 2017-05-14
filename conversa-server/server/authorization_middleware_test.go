@@ -2,12 +2,12 @@ package server_test
 
 import (
     "testing"
-    "github.com/dnp1/conversa/conversa-server/server/session"
+    "github.com/dnp1/conversa/conversa-server/session"
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/dnp1/conversa/conversa-server/server"
     "net/http"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/server/mock_session"
+    "github.com/dnp1/conversa/conversa-server/mock_session"
     "github.com/twinj/uuid"
     "github.com/stretchr/testify/assert"
     "net/http/httptest"

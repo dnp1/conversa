@@ -11,11 +11,11 @@ import (
     "net/http"
     "github.com/dnp1/conversa/conversa-server/server"
     "github.com/twinj/uuid"
-    "github.com/dnp1/conversa/conversa-server/server/mock_session"
-    "github.com/dnp1/conversa/conversa-server/server/session"
+    "github.com/dnp1/conversa/conversa-server/mock_session"
+    "github.com/dnp1/conversa/conversa-server/session"
     "fmt"
-    "github.com/dnp1/conversa/conversa-server/server/mock_room"
-    "github.com/dnp1/conversa/conversa-server/server/room"
+    "github.com/dnp1/conversa/conversa-server/mock_room"
+    "github.com/dnp1/conversa/conversa-server/room"
     "github.com/pkg/errors"
 )
 

@@ -4,7 +4,7 @@
 package mock_session
 
 import (
-	session "github.com/dnp1/conversa/conversa-server/server/session"
+	session "github.com/dnp1/conversa/conversa-server/session"
 	gomock "github.com/golang/mock/gomock"
 )
 
