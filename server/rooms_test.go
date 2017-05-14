@@ -126,7 +126,7 @@ func TestCreateRoom(t *testing.T) {
 
     for i, c := range cases {
         url := fmt.Sprintf("/users/%s/rooms", c.user)
-        req, err := http.NewRequest("POST", url, strings.NewReader(""))
+        req, err := http.NewRequest("POST", url, c.body)
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
                 Name: server.TokenCookieName,
