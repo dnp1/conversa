@@ -40,6 +40,6 @@ func (rc *RoomController) DeleteRoom(c *gin.Context) {
     }
 }
 
-func EditRoom(c *gin.Context) {
+func (rc *RoomController) EditRoom(c *gin.Context) {
     notImplemented(c)
 }

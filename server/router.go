@@ -49,7 +49,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     authorized.Use(authorization.Middleware)
     authorized.POST("/users/:user/rooms", roomCtrl.CreateRoom)
     authorized.DELETE("/users/:user/rooms/:room", roomCtrl.DeleteRoom)
-    authorized.PATCH("/users/:user/rooms/:room", EditRoom)
+    authorized.PATCH("/users/:user/rooms/:room", roomCtrl.EditRoom)
 
     return r
 }
