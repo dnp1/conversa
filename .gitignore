@@ -1,7 +1,9 @@
 #Ignoring IntelliJ files
 .idea
+/server/conversa-server/conversa-server
 *.iml
-/app/app
+
+
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
