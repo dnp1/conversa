@@ -1,6 +1,5 @@
 #Ignoring IntelliJ files
 .idea
-/server/conversa-server/conversa-server
 *.iml
 
 
