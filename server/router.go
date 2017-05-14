@@ -37,7 +37,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     authenticated.Use(authentication.Middleware)
     //auth.GET("/users", usersController.)
     authenticated.GET("/rooms", roomCtrl.ListRooms)
-    authenticated.GET("/users/:user/rooms", ListUserRooms)
+    authenticated.GET("/users/:user/rooms", roomCtrl.ListUserRooms)
 
     //authenticated.GET("/users/:user/rooms/:room/messages", ListMessages)
     //authenticated.POST("/users/:user/rooms/:room/messages", CreateMessage)

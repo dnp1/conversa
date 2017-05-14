@@ -18,7 +18,7 @@ func (rc *RoomController) ListRooms(c *gin.Context) {
     }
 }
 
-func ListUserRooms(c *gin.Context) {
+func (rc *RoomController) ListUserRooms(c *gin.Context) {
     notImplemented(c)
 }
 
