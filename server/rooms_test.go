@@ -39,6 +39,7 @@ func TestCreateRoom(t *testing.T) {
         uuid.NewV4(),
         uuid.NewV4(),
         uuid.NewV4(),
+        uuid.NewV4(),
     }
 
     const bodyExample = `{"name":"golang"}`
@@ -93,7 +94,7 @@ func TestCreateRoom(t *testing.T) {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
                 sessionData := &session.Data{Username:"dnp1"}
-                s.EXPECT().Retrieve(tokens[3].String()).Return(sessionData, nil)
+                s.EXPECT().Retrieve(tokens[4].String()).Return(sessionData, nil)
                 r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrCouldNotInsert)
                 rb := server.RouterBuilder{
                     Session:s,
@@ -103,15 +104,15 @@ func TestCreateRoom(t *testing.T) {
             }(),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusBadRequest,
+            http.StatusConflict,
         },
         {//Everything ok
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
                 sessionData := &session.Data{Username:"dnp1"}
-                s.EXPECT().Retrieve(tokens[3].String()).Return(sessionData, nil)
-                r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrCouldNotInsert)
+                s.EXPECT().Retrieve(tokens[5].String()).Return(sessionData, nil)
+                r.EXPECT().Create(sessionData.Username, "golang").Return(nil)
                 rb := server.RouterBuilder{
                     Session:s,
                     Room:r,

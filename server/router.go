@@ -18,8 +18,11 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     sessionCtrl := SessionController{
         Session: rb.Session,
     }
-    usersController := UsersController{
+    usersCtrl := UsersController{
         User: rb.User,
+    }
+    roomCtrl := RoomController{
+        Room: rb.Room,
     }
 
 
@@ -27,7 +30,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     r.POST("/session", sessionCtrl.Login)
     r.DELETE("/session", sessionCtrl.Logout)
 
-    r.POST("/users", usersController.CreateUser)
+    r.POST("/users", usersCtrl.CreateUser)
 
     authenticated := r.Group("")
     authentication := Authentication{Session:rb.Session}
@@ -44,7 +47,7 @@ func (rb * RouterBuilder) Build() *gin.Engine {
     authorized := r.Group("")
     authorization := Authorization{Session:rb.Session}
     authorized.Use(authorization.Middleware)
-    authorized.POST("/users/:user/rooms", CreateRoom)
+    authorized.POST("/users/:user/rooms", roomCtrl.CreateRoom)
     authorized.DELETE("/users/:user/rooms/:room", DeleteRoom)
     authorized.PATCH("/users/:user/rooms/:room", EditRoom)
 
