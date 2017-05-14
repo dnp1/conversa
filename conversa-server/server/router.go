@@ -27,8 +27,8 @@ func (rb *RouterBuilder) Build() *gin.Engine {
     }
 
     r := gin.New()
-    r.POST("/session", sessionCtrl.Login)
-    r.DELETE("/session", sessionCtrl.Logout)
+    r.POST("/sessions", sessionCtrl.Login)
+    r.DELETE("/sessions", sessionCtrl.Logout)
 
     r.POST("/users", usersCtrl.CreateUser)
 

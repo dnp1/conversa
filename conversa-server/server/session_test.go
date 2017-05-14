@@ -80,7 +80,7 @@ func TestSessionController_Login(t *testing.T) {
         },
     }
     for i, c := range cases {
-        req, err := http.NewRequest("POST", "/session", c.body)
+        req, err := http.NewRequest("POST", "/sessions", c.body)
         if assert.NoError(t, err) {
             resp := httptest.NewRecorder()
             c.router.ServeHTTP(resp, req)
@@ -132,7 +132,7 @@ func TestSessionController_Logout(t *testing.T) {
         },
     }
     for i, c := range cases {
-        req, err := http.NewRequest("DELETE", "/session", strings.NewReader(""))
+        req, err := http.NewRequest("DELETE", "/sessions", strings.NewReader(""))
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
                 Name: server.TokenCookieName,
