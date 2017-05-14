@@ -97,7 +97,6 @@ func TestAuthorization_Middleware(t *testing.T) {
 
     for i, c := range cases {
         url := fmt.Sprintf("/users/%s", c.username)
-        fmt.Println(url)
         req, err := http.NewRequest("GET", url, strings.NewReader(""))
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
