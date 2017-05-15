@@ -17,11 +17,17 @@ CREATE TABLE user_session (
 );
 
 CREATE TABLE room(
-    "id" serial PRIMARY KEY ,
+    "id" serial PRIMARY KEY,
     "user_id" INT REFERENCES "user"("id") NOT NULL,
     "username" VARCHAR(255) REFERENCES "user"("username") NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     CONSTRAINT "uq_name" UNIQUE("username", "name")
+);
+
+CREATE TABLE "room_messages"(
+    "id" serial PRIMARY KEY,
+    "user_id" INT REFERENCES "user"("id") NOT NULL,
+    "content" TEXT NOT NULL
 );
 
 

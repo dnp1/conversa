@@ -13,7 +13,7 @@ type Authorization struct {
 
 func (auth *Authorization) Middleware(c *gin.Context) {
     if token, err := c.Cookie(TokenCookieName); err != nil {
-        c.AbortWithError(http.StatusBadRequest, err)
+        c.AbortWithError(http.StatusUnauthorized, err)
         return
     } else if data, err := auth.Session.Retrieve(token); err == session.ErrTokenNotFound {
         c.AbortWithError(http.StatusUnauthorized, err)

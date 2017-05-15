@@ -44,8 +44,8 @@ type room struct {
 func (r *room) Create(username string, name string) error {
     //TODO:validate roomname with a regexp
     const query = `INSERT INTO "room"("name", "username", "user_id")
-        SELECT $1, $2, u.id FROM "user" u WHERE u."username" = $2
-        ON CONFLICT ON CONSTRAINT "uq_username" DO NOTHING RETURNING id;
+        SELECT $1, $2::TEXT, u.id FROM "user" u WHERE u."username" = $2
+        ON CONFLICT ON CONSTRAINT "uq_name" DO NOTHING RETURNING id;
     `
     var id int64
     if err := r.db.QueryRow(query, name, username).Scan(&id); err == sql.ErrNoRows {

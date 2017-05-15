@@ -46,7 +46,7 @@ func (u *user) Create(username string, password string, passwordConfirmation str
     if err != nil {
         return err
     }
-    const query = `INSERT INTO "user"("username", "password") VALUES('1121212', 'sadd')
+    const query = `INSERT INTO "user"("username", "password") VALUES($1, $2)
         ON CONFLICT ON CONSTRAINT "uq_username" DO NOTHING RETURNING id;`
     var id int64;
     if err := u.db.QueryRow(query, username, string(hashedPassword)).Scan(&id); err == sql.ErrNoRows {

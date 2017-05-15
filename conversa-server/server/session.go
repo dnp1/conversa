@@ -4,6 +4,7 @@ import (
     "net/http"
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/dnp1/conversa/conversa-server/session"
+    "time"
 )
 
 const TokenCookieName = "AUTH_TOKEN"
@@ -19,15 +20,8 @@ type LoginBody struct {
 }
 
 func deleteCookie(c *gin.Context, name string) {
-    c.SetCookie(
-        name,
-        "deleted",
-        -1,
-        "",
-        "",
-        true,
-        true,
-    )
+    cookie := http.Cookie{Name:name, Expires:time.Now().Add(-1 * 24 * time.Hour), Value: "deleted"}
+    http.SetCookie(c.Writer, &cookie)
 }
 
 func (sc *SessionController) Login(c *gin.Context) {
@@ -39,15 +33,8 @@ func (sc *SessionController) Login(c *gin.Context) {
     } else if err!=nil{
         c.AbortWithError(http.StatusInternalServerError, err)
     } else {
-        c.SetCookie(
-            TokenCookieName,
-            key,
-            24 * 60 * 60,
-            "",
-            "",
-            true,
-            true,
-        )
+        cookie := http.Cookie{Name: TokenCookieName, Value:key, Expires: time.Now().Add(1 * 24 * time.Hour)}
+        http.SetCookie(c.Writer, &cookie)
         c.Status(http.StatusOK)
     }
 }

@@ -44,7 +44,7 @@ func (s *session) Create(username string, password string) (string, error) {
         hashedPassword string
         userID int64
     )
-    const selQuery = `SELECT password, user_id FROM "user" WHERE username = $1;`
+    const selQuery = `SELECT password, id FROM "user" WHERE username = $1;`
     if err := s.db.QueryRow(selQuery, username).Scan(&hashedPassword, &userID); err == sql.ErrNoRows {
         return "", ErrBadCredentials
     } else if err != nil {

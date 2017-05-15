@@ -41,7 +41,7 @@ func TestAuthentication_Middleware(t *testing.T) {
     cases := [...]Case{
         {
             routerForAuthenticationTest(session.Session(nil)),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {
             func() *gin.Engine {

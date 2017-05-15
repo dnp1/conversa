@@ -47,7 +47,7 @@ func TestAuthorization_Middleware(t *testing.T) {
         {
             routerForAuthorizationTest(nil),
             "user",
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {
             func() *gin.Engine {

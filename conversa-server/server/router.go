@@ -26,7 +26,7 @@ func (rb *RouterBuilder) Build() *gin.Engine {
         Room: rb.Room,
     }
 
-    r := gin.New()
+    r := gin.Default()
     r.POST("/sessions", sessionCtrl.Login)
     r.DELETE("/sessions", sessionCtrl.Logout)
 

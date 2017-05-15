@@ -50,7 +50,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
             server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {//invalid token
             func() *gin.Engine {
@@ -190,7 +190,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
         {//no token
             server.NewRouter(nil),
             "dnp1",
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {//invalid token
             func() *gin.Engine {
@@ -301,7 +301,7 @@ func TestRoomController_EditRoom(t *testing.T) {
             server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {//invalid token
             func() *gin.Engine {
@@ -425,7 +425,7 @@ func TestRoomController_ListRooms(t *testing.T) {
             server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {//invalid token
             func() *gin.Engine {
@@ -523,7 +523,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
             server.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {//invalid token
             func() *gin.Engine {
