@@ -15,8 +15,6 @@ type User interface {
     Create(username string, password string, passwordConfirmation string) error
 }
 
-
-
 type Builder struct {
     DB *sql.DB
     BCryptCost int

@@ -25,9 +25,12 @@ func init() {
 }
 
 func main() {
-    db, err := sql.Open("postgres", os.Getenv("DB_CONN_STR"))
+    db, err := sql.Open("postgres", os.Getenv("CONVERSA_DB_CONN_STR"))
     if err != nil {
-        log.Fatal(err)
+        log.Fatalln(err)
+    }
+    if err := db.Ping(); err != nil {
+        log.Fatalln(err)
     }
 
     host := env("HOST", "0.0.0.0")

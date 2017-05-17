@@ -24,10 +24,20 @@ CREATE TABLE room(
     CONSTRAINT "uq_name" UNIQUE("username", "name")
 );
 
-CREATE TABLE "room_messages"(
+CREATE TABLE "messages"(
     "id" serial PRIMARY KEY,
+    "room_id" INT REFERENCES "room"("id") NOT NULL,
     "user_id" INT REFERENCES "user"("id") NOT NULL,
-    "content" TEXT NOT NULL
+    "content" TEXT NOT NULL,
+    "creation_datetime" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2),
+    "edition_date" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
+);
+
+CREATE TABLE "badwords"(
+    "id" serial PRIMARY KEY,
+    "room_id" INT REFERENCES "room"("id") NOT NULL,
+    "word" TEXT NOT NULL,
+    "creation_datetime" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
 );
 
 
