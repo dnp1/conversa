@@ -76,7 +76,7 @@ func TestSessionController_Login(t *testing.T) {
                 return rb.Build()
             }(),
             strings.NewReader(`{"username":"user", "password":"passphrase"}`),
-            http.StatusOK,
+            http.StatusCreated,
         },
     }
     for i, c := range cases {

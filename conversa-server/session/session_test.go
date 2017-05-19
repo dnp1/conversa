@@ -8,7 +8,8 @@ import (
     "github.com/stretchr/testify/assert"
     "errors"
     "golang.org/x/crypto/bcrypt"
-    "github.com/satori/go.uuid"
+
+    "github.com/twinj/uuid"
 )
 
 func TestSession_Create(t *testing.T) {

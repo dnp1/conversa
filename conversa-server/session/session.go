@@ -4,7 +4,8 @@ import (
     "github.com/pkg/errors"
     "database/sql"
     "golang.org/x/crypto/bcrypt"
-    "github.com/satori/go.uuid"
+
+    "github.com/twinj/uuid"
 )
 
 var (

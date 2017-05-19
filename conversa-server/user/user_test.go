@@ -7,7 +7,8 @@ import (
     "github.com/stretchr/testify/assert"
     "github.com/pkg/errors"
     "golang.org/x/crypto/bcrypt"
-    "github.com/satori/go.uuid"
+
+    "github.com/twinj/uuid"
 )
 
 func TestUser_Create(t *testing.T) {

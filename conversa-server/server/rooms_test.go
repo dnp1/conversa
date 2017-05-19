@@ -140,7 +140,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
             }(),
             "dnp1",
             strings.NewReader(bodyExample),
-            http.StatusOK,
+            http.StatusCreated,
         },
     }
 
@@ -230,7 +230,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
                 return rb.Build()
             }(),
             "dnp1",
-            http.StatusConflict,
+            http.StatusNoContent,
         },
         {//Everything ok
             func() *gin.Engine {
@@ -430,7 +430,7 @@ func TestRoomController_ListRooms(t *testing.T) {
         {//invalid token
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Valid(tokens[1].String()).Return(session.ErrTokenNotFound)
+                s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
                 rb := server.RouterBuilder{
                     Session:s,
                 }
@@ -444,7 +444,7 @@ func TestRoomController_ListRooms(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
-                s.EXPECT().Valid(tokens[2].String()).Return(nil)
+                s.EXPECT().Retrieve(tokens[2].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().All().Return(nil, room.ErrCouldNotRetrieveRooms)
                 rb := server.RouterBuilder{
                     Session:s,
@@ -460,7 +460,7 @@ func TestRoomController_ListRooms(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
-                s.EXPECT().Valid(tokens[3].String()).Return(nil)
+                s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().All().Return([]room.Data{}, nil)
                 rb := server.RouterBuilder{
                     Session:s,
@@ -528,7 +528,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
         {//invalid token
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Valid(tokens[1].String()).Return(session.ErrTokenNotFound)
+                s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
                 rb := server.RouterBuilder{
                     Session:s,
                 }
@@ -542,7 +542,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
-                s.EXPECT().Valid(tokens[2].String()).Return(nil)
+                s.EXPECT().Retrieve(tokens[2].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().AllByUser(userName).Return(nil, room.ErrCouldNotRetrieveRooms)
                 rb := server.RouterBuilder{
                     Session:s,
@@ -558,7 +558,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 r := mock_room.NewMockRoom(mockCtrl)
-                s.EXPECT().Valid(tokens[3].String()).Return(nil)
+                s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().AllByUser(userName).Return([]room.Data{}, nil)
                 rb := server.RouterBuilder{
                     Session:s,

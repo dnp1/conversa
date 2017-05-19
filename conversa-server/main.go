@@ -19,10 +19,6 @@ func env(key string, defaultVal string) string {
     }
 }
 
-//inject dependencies here
-func init() {
-
-}
 
 func main() {
     db, err := sql.Open("postgres", os.Getenv("CONVERSA_DB_CONN_STR"))
