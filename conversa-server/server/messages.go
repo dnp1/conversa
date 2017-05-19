@@ -5,13 +5,19 @@ import (
     "github.com/dnp1/conversa/conversa-server/message"
     "strconv"
     "net/http"
+    "github.com/pkg/errors"
 )
+
+var ErrContextSetAssertion = errors.New("Server assertion wasn't true")
 
 type MessageController struct {
     Message message.Message
 }
 
 func (mc *MessageController) ListMessages(c *gin.Context) {
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     var (
         username = c.Param("user")
         roomName = c.Param("room")
@@ -20,22 +26,25 @@ func (mc *MessageController) ListMessages(c *gin.Context) {
     )
     if queryLimit, ok := c.GetQuery("limit"); ok {
         if i, err := strconv.ParseInt(queryLimit, 10, 64); err != nil {
-            c.AbortWithError(http.StatusBadRequest, err)
+            const msg = "msgs limit should be a integer"
+            resp.Fill(http.StatusBadRequest, msg)
         } else {
             limit = i
         }
     }
-    if queryOffset, ok := c.GetQuery("limit"); ok {
+    if queryOffset, ok := c.GetQuery("offset"); ok {
         if i, err := strconv.ParseInt(queryOffset, 10, 64); err != nil {
-            c.AbortWithError(http.StatusBadRequest, err)
+            const msg = "msgs offset should be a integer"
+            resp.Fill(http.StatusBadRequest, msg)
         } else {
             offset = i
         }
     }
+
     if data, err := mc.Message.All(username, roomName, limit, offset); err != nil {
-        c.AbortWithError(http.StatusInternalServerError, err)
+        resp.FillWithUnexpected(err)
     } else {
-        c.JSON(http.StatusOK, data)
+        resp.FillWithData(http.StatusOK, "message's list", data)
     }
 }
 
@@ -44,23 +53,34 @@ type MessageBody struct {
 }
 
 func (mc *MessageController) CreateMessage(c *gin.Context) {
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     var (
         username = c.Param("user")
         roomName = c.Param("room")
         body MessageBody
     )
     if senderName, ok := GetString(c, "username"); !ok {
-        c.AbortWithStatus(http.StatusInternalServerError)
+        resp.FillWithUnexpected(ErrContextSetAssertion)
     } else if err := c.BindJSON(&body); err != nil {
-        c.AbortWithError(http.StatusBadRequest, err)
-    } else if err := mc.Message.Create(username, roomName, senderName, body.Content); err != nil {
-        c.AbortWithError(http.StatusInternalServerError, err) // TODO:improve it
+        const msg = "body sent is not a valid json"
+        resp.Fill(http.StatusBadRequest, msg)
+    } else if err := mc.Message.Create(username, roomName, senderName, body.Content);
+        err == message.ErrMessageIsEmpty || err == message.ErrCouldNotFound {
+        resp.Fill(http.StatusBadRequest, err.Error())
+    } else if err != nil {
+        resp.FillWithUnexpected(err)
     } else {
-        c.Status(http.StatusOK)
+        const msg = "message created with success"
+        resp.Fill(http.StatusCreated, msg)
     }
 }
 
 func (mc *MessageController) EditMessage(c *gin.Context) {
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     var (
         msg = c.Param("message")
         username = c.Param("user")
@@ -68,26 +88,37 @@ func (mc *MessageController) EditMessage(c *gin.Context) {
         body MessageBody
     )
     if messageOwner, ok := GetString(c, "username"); !ok {
-        c.AbortWithStatus(http.StatusInternalServerError)
+        resp.FillWithUnexpected(ErrContextSetAssertion)
     } else if err := c.BindJSON(&body); err != nil {
-        c.AbortWithError(http.StatusBadRequest, err)
-    } else if err := mc.Message.Edit(username, roomName, messageOwner, msg, body.Content); err != nil {
-        c.AbortWithError(http.StatusInternalServerError, err) // TODO:improve it
+        const msg = "body sent is not a valid json"
+        resp.Fill(http.StatusBadRequest, msg)
+    } else if err := mc.Message.Edit(username, roomName, messageOwner, msg, body.Content);
+        err == message.ErrMessageIsEmpty || err == message.ErrCouldNotFound {
+        resp.Fill(http.StatusBadRequest, err.Error())
+    } else if err != nil {
+        resp.FillWithUnexpected(err)
     } else {
-        c.Status(http.StatusOK)
+        const msg = "message updated with success"
+        resp.Fill(http.StatusOK, msg)
     }
 }
 func (mc *MessageController) DeleteMessage(c *gin.Context) {
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     var (
         msg = c.Param("message")
         username = c.Param("user")
         roomName = c.Param("room")
     )
     if messageOwner, ok := GetString(c, "username"); !ok {
-        c.AbortWithStatus(http.StatusInternalServerError)
-    } else if err := mc.Message.Delete(username, roomName, messageOwner, msg); err != nil {
-        c.AbortWithError(http.StatusInternalServerError, err) // TODO:improve it
+        resp.FillWithUnexpected(ErrContextSetAssertion)
+    } else if err := mc.Message.Delete(username, roomName, messageOwner, msg); err == message.ErrCouldNotFound {
+        resp.Fill(http.StatusNoContent, err.Error())
+    } else if err != nil {
+        resp.FillWithUnexpected(err)
     } else {
-        c.Status(http.StatusOK)
+        const msg = "message deleted with success"
+        resp.Fill(http.StatusOK, msg)
     }
 }

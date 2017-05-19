@@ -9,7 +9,7 @@ import (
 
 var (//errors
     ErrMessageIsEmpty = errors.New("Message is empty, invalid!")
-    ErrCouldNotFindRoom = errors.New("Trying to create message on a unexisting room!")
+    ErrCouldNotFound = errors.New("Unexisting data") //TODO:improve it
 )
 
 type Data struct {
@@ -60,7 +60,7 @@ func (m *message) Create(username , roomName, senderName, content string) error 
     }
 
     if err := m.db.QueryRow(query, username, roomName, senderName, content).Scan(&id); err == sql.ErrNoRows {
-        return ErrCouldNotFindRoom
+        return ErrCouldNotFound
     } else if err != nil {
         return err
     }
@@ -93,7 +93,7 @@ func (m *message) Edit(username, roomName, messageOwner, message, content string
     }
 
     if err := m.db.QueryRow(query, username, roomName, messageOwner, message, content).Scan(&id); err == sql.ErrNoRows {
-        return ErrCouldNotFindRoom
+        return ErrCouldNotFound
     } else if err != nil {
         return err
     }
@@ -121,7 +121,7 @@ func (m *message) Delete(username, roomName, message, messageOwner string) error
 
     var id int64
     if err := m.db.QueryRow(query, username, roomName, messageOwner, message).Scan(&id); err == sql.ErrNoRows {
-        return ErrCouldNotFindRoom
+        return ErrCouldNotFound
     } else if err != nil {
         return err
     }

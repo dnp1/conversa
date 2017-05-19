@@ -40,7 +40,7 @@ func (sc *SessionController) Login(c *gin.Context) {
         cookie := http.Cookie{Name: TokenCookieName, Value:key, Expires: time.Now().Add(1 * 24 * time.Hour)}
         http.SetCookie(c.Writer, &cookie)
         const msg = "sucessful sign-in"
-        resp.Fill(http.StatusOK, msg)
+        resp.Fill(http.StatusCreated, msg)
     }
 }
 
