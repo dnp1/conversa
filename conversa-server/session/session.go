@@ -3,7 +3,6 @@ package session
 import (
     "github.com/pkg/errors"
     "database/sql"
-    "github.com/jmoiron/sqlx"
     "golang.org/x/crypto/bcrypt"
     "github.com/satori/go.uuid"
 )
@@ -31,12 +30,12 @@ type Builder struct {
 
 func (builder Builder) Build() Session {
     return &session{
-        db: sqlx.NewDb(builder.DB, ""),
+        db: builder.DB,
     }
 }
 
 type session struct {
-    db *sqlx.DB
+    db *sql.DB
 }
 
 func (s *session) Create(username string, password string) (string, error) {

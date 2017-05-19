@@ -19,18 +19,26 @@ type CreateUser struct {
 
 func (uc *UsersController) CreateUser(c *gin.Context) {
     var body CreateUser
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     if err := c.BindJSON(&body); err != nil {
-        c.AbortWithError(http.StatusBadRequest, err)
+        const msg = "body sent is not a valid json"
+        resp.Fill(http.StatusBadRequest, msg)
     } else if err:= uc.User.Create(body.Username, body.Password, body.PasswordConfirmation); err != nil {
         switch err {
-        case user.ErrPasswordConfirmationDoesNotMatch:
-            c.AbortWithError(http.StatusBadRequest, err)
+        case user.ErrPasswordConfirmationDoesNotMatch: fallthrough
+        case user.ErrUsernameHasInvalidCharacters: fallthrough
+        case user.ErrUsernameWrongLength: fallthrough
+        case user.ErrPasswordTooShort:
+            resp.Fill(http.StatusBadRequest, err.Error())
         case user.ErrUsernameAlreadyTaken:
-            c.AbortWithError(http.StatusConflict, err)
+            resp.Fill(http.StatusConflict, err.Error())
         default:
-            c.AbortWithError(http.StatusInternalServerError, err)
+            resp.FillWithUnexpected(err)
         }
     } else {
-        c.Status(http.StatusOK)
+        const msg = "user created with success"
+        resp.Fill(http.StatusOK, msg)
     }
 }

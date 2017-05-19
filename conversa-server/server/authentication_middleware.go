@@ -15,11 +15,12 @@ func (auth *Authentication) Middleware(c *gin.Context) {
     if token, err := c.Cookie(TokenCookieName); err != nil {
         c.AbortWithError(http.StatusUnauthorized, err)
         return
-    } else if err := auth.Session.Valid(token); err == session.ErrTokenNotFound {
+    } else if data, err := auth.Session.Retrieve(token); err == session.ErrTokenNotFound {
         c.AbortWithError(http.StatusUnauthorized, err)
     } else if err != nil {
         c.AbortWithError(http.StatusInternalServerError, err)
-    } else {
+    } else{
+        c.Set("username", data.Username)
         c.Next()
     }
 }

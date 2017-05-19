@@ -43,15 +43,9 @@ func (rb *RouterBuilder) Build() *gin.Engine {
     authenticated.GET("/rooms", roomCtrl.ListRooms)
     authenticated.GET("/users/:user/rooms", roomCtrl.ListUserRooms)
     authenticated.GET("/users/:user/rooms/:room/messages", messageCtrl.ListMessages)
-
-
-
-    authorized := r.Group("")
-    authorization := Authorization{Session:rb.Session}
-    authorized.Use(authorization.Middleware)
-    authorized.POST("/users/:user/rooms", roomCtrl.CreateRoom)
-    authorized.DELETE("/users/:user/rooms/:room", roomCtrl.DeleteRoom)
-    authorized.PATCH("/users/:user/rooms/:room", roomCtrl.EditRoom)
+    authenticated.POST("/users/:user/rooms", roomCtrl.CreateRoom)
+    authenticated.DELETE("/users/:user/rooms/:room", roomCtrl.DeleteRoom)
+    authenticated.PATCH("/users/:user/rooms/:room", roomCtrl.EditRoom)
     authenticated.POST("/users/:user/rooms/:room/messages", messageCtrl.CreateMessage)
     authenticated.PATCH("/users/:user/rooms/:room/messages/:message", messageCtrl.EditMessage)
     authenticated.DELETE("/users/:user/rooms/:room/messages/:message", messageCtrl.DeleteMessage)

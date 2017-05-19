@@ -12,13 +12,15 @@ import (
     "github.com/dnp1/conversa/conversa-server/mock_session"
     "github.com/twinj/uuid"
     "errors"
+    "fmt"
+    "strings"
 )
 
 func routerForAuthenticationTest(s session.Session) *gin.Engine {
     auth := server.Authentication{Session: s}
     r := gin.New()
     r.Use(auth.Middleware)
-    r.GET("/", func(c *gin.Context) {
+    r.GET("/users/:user", func(c *gin.Context) {
         c.Status(http.StatusOK)
     })
     return r
@@ -26,54 +28,77 @@ func routerForAuthenticationTest(s session.Session) *gin.Engine {
 
 func TestAuthentication_Middleware(t *testing.T) {
     type Case struct {
-        router *gin.Engine
-        status int
+        router   *gin.Engine
+        username string
+        status   int
     }
+    mockCtrl := gomock.NewController(t)
+    defer mockCtrl.Finish()
 
-    tokens := [...]uuid.UUID {
+    tokens := [...]uuid.UUID{
         nil,
         uuid.NewV4(),
         uuid.NewV4(),
         uuid.NewV4(),
+        uuid.NewV4(),
     }
-    mockCtrl := gomock.NewController(t)
-    defer mockCtrl.Finish()
+
     cases := [...]Case{
         {
-            routerForAuthenticationTest(session.Session(nil)),
+            routerForAuthenticationTest(nil),
+            "user",
             http.StatusUnauthorized,
         },
         {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Valid(tokens[1].String()).Return(session.ErrTokenNotFound)
+                s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
                 r := routerForAuthenticationTest(s)
                 return r
             }(),
+            "user",
             http.StatusUnauthorized,
         },
         {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Valid(tokens[2].String()).Return(errors.New("unexpected error"))
+                s.EXPECT().Retrieve(tokens[2].String()).Return(nil, errors.New("Unexpected Error."))
                 r := routerForAuthenticationTest(s)
                 return r
             }(),
+            "user",
             http.StatusInternalServerError,
         },
         {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Valid(tokens[3].String()).Return(nil)
+                s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{
+                    Username:"user0",
+                }, nil)
                 r := routerForAuthenticationTest(s)
                 return r
             }(),
+            "user",
+            http.StatusUnauthorized,
+        },
+        {
+            func() *gin.Engine {
+                s := mock_session.NewMockSession(mockCtrl)
+                s.EXPECT().Retrieve(tokens[4].String()).Return(&session.Data{
+                    Username:"user",
+                }, nil)
+                r := routerForAuthenticationTest(s)
+                return r
+            }(),
+            "user",
             http.StatusOK,
         },
     }
 
     for i, c := range cases {
-        req, err := http.NewRequest("GET", "/", nil)
+        fmt.Println("case", i)
+        url := fmt.Sprintf("/users/%s", c.username)
+        req, err := http.NewRequest("GET", url, strings.NewReader(""))
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
                 Name: server.TokenCookieName,
@@ -83,6 +108,8 @@ func TestAuthentication_Middleware(t *testing.T) {
                 HttpOnly: true,
             })
         }
+
+
         if assert.NoError(t, err) {
             resp := httptest.NewRecorder()
             c.router.ServeHTTP(resp, req)

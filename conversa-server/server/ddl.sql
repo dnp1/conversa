@@ -42,3 +42,8 @@ CREATE TABLE "badwords"(
 
 
 
+INSERT INTO "message"("room_id", "user_id", "content")
+    SELECT r.id, u.id, $4
+        FROM room
+        LEFT JOIN "user" u ON u.username = $3
+        r WHERE r.name = $1 AND r.username = $2

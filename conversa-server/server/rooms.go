@@ -11,18 +11,26 @@ type RoomController struct {
 }
 
 func (rc *RoomController) ListRooms(c *gin.Context) {
-    if data, err := rc.Room.All(); err != nil{
-        c.AbortWithError(http.StatusInternalServerError, err)
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
+    if data, err := rc.Room.All(); err != nil {
+        resp.FillWithUnexpected(err)
     } else {
-        c.JSON(http.StatusOK, data)
+        const msg = "list of rooms"
+        resp.FillWithData(http.StatusOK, msg, data)
     }
 }
 
 func (rc *RoomController) ListUserRooms(c *gin.Context) {
-    if data, err := rc.Room.AllByUser(c.Param("user")); err != nil{
-        c.AbortWithError(http.StatusInternalServerError, err)
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
+    if data, err := rc.Room.AllByUser(c.Param("user")); err != nil {
+        resp.FillWithUnexpected(err)
     } else {
-        c.JSON(http.StatusOK, data)
+        const msg = "list of user's rooms"
+        resp.FillWithData(http.StatusOK, msg, data)
     }
 }
 
@@ -32,32 +40,48 @@ type CreateRoom struct {
 
 func (rc *RoomController) CreateRoom(c *gin.Context) {
     var body CreateRoom
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     if err := c.BindJSON(&body); err != nil {
-        c.AbortWithError(http.StatusBadRequest, err)
+        const msg = "body sent is not a valid json"
+        resp.Fill(http.StatusBadRequest, msg)
     } else if err := rc.Room.Create(c.Param("user"), body.Name); err == room.ErrRoomNameAlreadyExists {
-        c.AbortWithError(http.StatusConflict, err)
+        resp.Fill(http.StatusConflict, err.Error())
+    } else if err == room.ErrRoomNameHasInvalidCharacters || err == room.ErrRoomNameWrongLength {
+        resp.Fill(http.StatusBadRequest, err.Error())
     } else if err != nil {
-        c.AbortWithError(http.StatusInternalServerError, err)
+        resp.FillWithUnexpected(err)
     } else {
-        c.Status(http.StatusOK)
+        const msg = "room created with success!"
+        resp.Fill(http.StatusCreated, msg)
     }
 }
 
 func (rc *RoomController) DeleteRoom(c *gin.Context) {
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     if err := rc.Room.Delete(c.Param("user"), c.Param("room")); err != nil {
-        c.AbortWithError(http.StatusConflict, err)
+        resp.Fill(http.StatusNoContent, err.Error())
     } else {
-        c.Status(http.StatusOK)
+        const msg = "room deleted with success!"
+        resp.Fill(http.StatusOK, msg)
     }
 }
 
 func (rc *RoomController) EditRoom(c *gin.Context) {
     var body CreateRoom
+    var resp ResponseBody
+    defer resp.WriteJSON(c)
+
     if err := c.BindJSON(&body); err != nil {
-        c.AbortWithError(http.StatusBadRequest, err)
+        const msg = "body sent is not a valid json"
+        resp.Fill(http.StatusBadRequest, msg)
     } else if err := rc.Room.Rename(c.Param("user"), c.Param("room"), body.Name); err != nil {
-        c.AbortWithError(http.StatusConflict, err)
+        resp.Fill(http.StatusConflict, err.Error()) //TODO:improve it
     } else {
-        c.Status(http.StatusOK)
+        const msg = "room edited with success!"
+        resp.Fill(http.StatusOK, msg)
     }
 }
