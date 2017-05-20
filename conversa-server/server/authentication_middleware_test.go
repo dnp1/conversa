@@ -73,18 +73,6 @@ func TestAuthentication_Middleware(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{
-                    Username:"user0",
-                }, nil)
-                r := routerForAuthenticationTest(s)
-                return r
-            }(),
-            "user",
-            http.StatusUnauthorized,
-        },
-        {
-            func() *gin.Engine {
-                s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Retrieve(tokens[4].String()).Return(&session.Data{
                     Username:"user",
                 }, nil)
                 r := routerForAuthenticationTest(s)

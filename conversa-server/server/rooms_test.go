@@ -430,6 +430,7 @@ func TestRoomController_ListRooms(t *testing.T) {
         {//invalid token
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
+
                 s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
                 rb := server.RouterBuilder{
                     Session:s,

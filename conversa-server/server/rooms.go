@@ -43,10 +43,16 @@ func (rc *RoomController) CreateRoom(c *gin.Context) {
     var resp ResponseBody
     defer resp.WriteJSON(c)
 
-    if err := c.BindJSON(&body); err != nil {
+    var user = c.Param("user")
+    if username, ok := GetString(c, "username"); !ok {
+        resp.FillWithUnexpected(ErrContextSetAssertion)
+    } else if user != username {
+        const msg = "permission denied"
+        resp.Fill(http.StatusBadRequest, msg)
+    } else if err := c.BindJSON(&body); err != nil {
         const msg = "body sent is not a valid json"
         resp.Fill(http.StatusBadRequest, msg)
-    } else if err := rc.Room.Create(c.Param("user"), body.Name); err == room.ErrRoomNameAlreadyExists {
+    } else if err := rc.Room.Create(user, body.Name); err == room.ErrRoomNameAlreadyExists {
         resp.Fill(http.StatusConflict, err.Error())
     } else if err == room.ErrRoomNameHasInvalidCharacters || err == room.ErrRoomNameWrongLength {
         resp.Fill(http.StatusBadRequest, err.Error())
@@ -62,7 +68,13 @@ func (rc *RoomController) DeleteRoom(c *gin.Context) {
     var resp ResponseBody
     defer resp.WriteJSON(c)
 
-    if err := rc.Room.Delete(c.Param("user"), c.Param("room")); err != nil {
+    var user = c.Param("user")
+    if username, ok := GetString(c, "username"); !ok {
+        resp.FillWithUnexpected(ErrContextSetAssertion)
+    } else if user != username {
+        const msg = "permission denied"
+        resp.Fill(http.StatusBadRequest, msg)
+    } else if err := rc.Room.Delete(c.Param("user"), c.Param("room")); err != nil {
         resp.Fill(http.StatusNoContent, err.Error())
     } else {
         const msg = "room deleted with success!"
@@ -75,7 +87,13 @@ func (rc *RoomController) EditRoom(c *gin.Context) {
     var resp ResponseBody
     defer resp.WriteJSON(c)
 
-    if err := c.BindJSON(&body); err != nil {
+    var user = c.Param("user")
+    if username, ok := GetString(c, "username"); !ok {
+        resp.FillWithUnexpected(ErrContextSetAssertion)
+    } else if user != username {
+        const msg = "permission denied"
+        resp.Fill(http.StatusBadRequest, msg)
+    } else if err := c.BindJSON(&body); err != nil {
         const msg = "body sent is not a valid json"
         resp.Fill(http.StatusBadRequest, msg)
     } else if err := rc.Room.Rename(c.Param("user"), c.Param("room"), body.Name); err != nil {

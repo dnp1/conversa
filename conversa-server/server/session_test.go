@@ -35,12 +35,12 @@ func TestSessionController_Login(t *testing.T) {
         {
             server.NewRouter(nil),
             strings.NewReader(""),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {
             server.NewRouter(nil),
             strings.NewReader(`{"user_name": "json","password"}`),
-            http.StatusBadRequest,
+            http.StatusUnauthorized,
         },
         {
             func() *gin.Engine {

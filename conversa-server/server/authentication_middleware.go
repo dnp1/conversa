@@ -12,13 +12,16 @@ type Authentication struct {
 }
 
 func (auth *Authentication) Middleware(c *gin.Context) {
+    var resp ResponseBody
     if token, err := c.Cookie(TokenCookieName); err != nil {
-        c.AbortWithError(http.StatusUnauthorized, err)
-        return
+        resp.Fill(http.StatusUnauthorized, err.Error())
+        resp.WriteJSON(c)
     } else if data, err := auth.Session.Retrieve(token); err == session.ErrTokenNotFound {
-        c.AbortWithError(http.StatusUnauthorized, err)
+        resp.Fill(http.StatusUnauthorized, err.Error())
+        resp.WriteJSON(c)
     } else if err != nil {
-        c.AbortWithError(http.StatusInternalServerError, err)
+        resp.FillWithUnexpected(err)
+        resp.WriteJSON(c)
     } else{
         c.Set("username", data.Username)
         c.Next()
