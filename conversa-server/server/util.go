@@ -2,13 +2,11 @@ package server
 
 import (
     "net/http"
-    "github.com/pkg/errors"
-
     "gopkg.in/gin-gonic/gin.v1"
 )
 
 type ResponseBody struct {
-    Status  int `json:"status"`
+    Status  int `json:"-"`
     Message string `json:"message"`
     Data    interface{} `json:"data,ommitempty"`
     Err     error `json:"-"`
@@ -42,13 +40,6 @@ func (resp *ResponseBody) FillWithData(status int, msg string, data interface{})
         Message: msg,
         Data: data,
     }
-}
-
-func notImplemented(c *gin.Context) {
-    c.AbortWithError(
-        http.StatusNotImplemented,
-        errors.New("Not yet implemented!"),
-    )
 }
 
 func GetString(c *gin.Context, name string) (string, bool) {

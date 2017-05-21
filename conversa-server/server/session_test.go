@@ -32,15 +32,15 @@ func TestSessionController_Login(t *testing.T) {
     defer mockCtrl.Finish()
 
     cases := [...]Case{
-        {
+        {// Bad request. empty body
             server.NewRouter(nil),
             strings.NewReader(""),
-            http.StatusUnauthorized,
+            http.StatusBadRequest,
         },
-        {
+        {//Bad wrong json
             server.NewRouter(nil),
             strings.NewReader(`{"user_name": "json","password"}`),
-            http.StatusUnauthorized,
+            http.StatusBadRequest,
         },
         {
             func() *gin.Engine {
@@ -57,13 +57,13 @@ func TestSessionController_Login(t *testing.T) {
         {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
-                s.EXPECT().Create("user", "password").Return("", session.ErrBadCredentials)
+                s.EXPECT().Create("user", "passworddsfsfds").Return("", session.ErrBadCredentials)
                 rb := server.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
             }(),
-            strings.NewReader(`{"username": "user", "password": "password"}`),
+            strings.NewReader(`{"username": "user", "password": "passworddsfsfds"}`),
             http.StatusUnauthorized,
         },
         {

@@ -84,7 +84,6 @@ func TestAuthentication_Middleware(t *testing.T) {
     }
 
     for i, c := range cases {
-        fmt.Println("case", i)
         url := fmt.Sprintf("/users/%s", c.username)
         req, err := http.NewRequest("GET", url, strings.NewReader(""))
         if tokens[i] != nil {

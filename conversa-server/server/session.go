@@ -33,7 +33,7 @@ func (sc *SessionController) Login(c *gin.Context) {
         const msg = "body sent is not a valid json"
         resp.Fill(http.StatusBadRequest, msg)
     } else if key, err := sc.Session.Create(body.Username, body.Password); err == session.ErrBadCredentials {
-        resp.Fill(http.StatusBadRequest, err.Error())
+        resp.Fill(http.StatusUnauthorized, err.Error())
     } else if err != nil {
         resp.FillWithUnexpected(err)
     } else {
