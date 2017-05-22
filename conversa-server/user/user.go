@@ -52,7 +52,7 @@ type user struct {
     bCryptCost int
 }
 
-var regexpUsername = regexp.MustCompile("[a-zA-Z0-9_]")
+var regexpUsername = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 
 func Validate(username, password, passwordConfirmation string) error {
     if password != passwordConfirmation {
