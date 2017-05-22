@@ -1,12 +1,12 @@
-package server
+package rest
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/conversa-server/session"
-    "github.com/dnp1/conversa/conversa-server/user"
-    "github.com/dnp1/conversa/conversa-server/room"
+    "github.com/dnp1/conversa/server/session"
+    "github.com/dnp1/conversa/server/user"
+    "github.com/dnp1/conversa/server/room"
     "database/sql"
-    "github.com/dnp1/conversa/conversa-server/message"
+    "github.com/dnp1/conversa/server/message"
 )
 
 type RouterBuilder struct {

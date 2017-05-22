@@ -1,4 +1,4 @@
-package server_test
+package rest_test
 
 import (
     "testing"
@@ -6,10 +6,10 @@ import (
     "github.com/stretchr/testify/assert"
     "net/http/httptest"
     "net/http"
-    "github.com/dnp1/conversa/conversa-server/server"
+    "github.com/dnp1/conversa/server/rest"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/session"
-    "github.com/dnp1/conversa/conversa-server/mock_session"
+    "github.com/dnp1/conversa/server/session"
+    "github.com/dnp1/conversa/server/mock_session"
     "github.com/twinj/uuid"
     "errors"
     "fmt"
@@ -17,7 +17,7 @@ import (
 )
 
 func routerForAuthenticationTest(s session.Session) *gin.Engine {
-    auth := server.Authentication{Session: s}
+    auth := rest.Authentication{Session: s}
     r := gin.New()
     r.Use(auth.Middleware)
     r.GET("/users/:user", func(c *gin.Context) {
@@ -88,7 +88,7 @@ func TestAuthentication_Middleware(t *testing.T) {
         req, err := http.NewRequest("GET", url, strings.NewReader(""))
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+        Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,

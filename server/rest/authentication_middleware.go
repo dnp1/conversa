@@ -1,8 +1,8 @@
-package server
+package rest
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/conversa-server/session"
+    "github.com/dnp1/conversa/server/session"
     "net/http"
 )
 

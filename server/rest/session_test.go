@@ -1,17 +1,17 @@
-package server_test
+package rest_test
 
 import (
     "testing"
     "net/http/httptest"
     "net/http"
     "github.com/stretchr/testify/assert"
-    "github.com/dnp1/conversa/conversa-server/server"
+    "github.com/dnp1/conversa/server/rest"
     "strings"
     "io"
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/mock_session"
-    "github.com/dnp1/conversa/conversa-server/session"
+    "github.com/dnp1/conversa/server/mock_session"
+    "github.com/dnp1/conversa/server/session"
 
     "github.com/twinj/uuid"
     "github.com/pkg/errors"
@@ -33,12 +33,12 @@ func TestSessionController_Login(t *testing.T) {
 
     cases := [...]Case{
         {// Bad request. empty body
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             strings.NewReader(""),
             http.StatusBadRequest,
         },
         {//Bad wrong json
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             strings.NewReader(`{"user_name": "json","password"}`),
             http.StatusBadRequest,
         },
@@ -46,7 +46,7 @@ func TestSessionController_Login(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Create("user", "password").Return("", errors.New("Unexpected!"))
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -58,7 +58,7 @@ func TestSessionController_Login(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Create("user", "passworddsfsfds").Return("", session.ErrBadCredentials)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -70,7 +70,7 @@ func TestSessionController_Login(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Create("user", "passphrase").Return("my token!!!", nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -105,14 +105,14 @@ func TestSessionController_Logout(t *testing.T) {
     defer mockCtrl.Finish()
     cases := [...]Case{
         {
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             http.StatusNoContent,
         },
         {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Delete(tokens[1].String()).Return(session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -123,7 +123,7 @@ func TestSessionController_Logout(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Delete(tokens[2].String()).Return(nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -135,7 +135,7 @@ func TestSessionController_Logout(t *testing.T) {
         req, err := http.NewRequest("DELETE", "/sessions", strings.NewReader(""))
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+                Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,

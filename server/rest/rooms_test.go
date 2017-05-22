@@ -1,4 +1,4 @@
-package server_test
+package rest_test
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
@@ -9,13 +9,13 @@ import (
     "github.com/stretchr/testify/assert"
     "net/http/httptest"
     "net/http"
-    "github.com/dnp1/conversa/conversa-server/server"
+    "github.com/dnp1/conversa/server/rest"
     "github.com/twinj/uuid"
-    "github.com/dnp1/conversa/conversa-server/mock_session"
-    "github.com/dnp1/conversa/conversa-server/session"
+    "github.com/dnp1/conversa/server/mock_session"
+    "github.com/dnp1/conversa/server/session"
     "fmt"
-    "github.com/dnp1/conversa/conversa-server/mock_room"
-    "github.com/dnp1/conversa/conversa-server/room"
+    "github.com/dnp1/conversa/server/mock_room"
+    "github.com/dnp1/conversa/server/room"
     "github.com/pkg/errors"
 )
 
@@ -47,7 +47,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
     const bodyExample = `{"name":"golang"}`
     cases := []Case{
         {//no token
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusUnauthorized,
@@ -56,7 +56,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -69,7 +69,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[2].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -82,7 +82,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username:"dnp1"}, nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -98,7 +98,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[4].String()).Return(sessionData, nil)
                 r.EXPECT().Create(sessionData.Username, "golang").Return(errors.New("Unexpected error"))
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -115,7 +115,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[5].String()).Return(sessionData, nil)
                 r.EXPECT().Create(sessionData.Username, "golang").Return(room.ErrRoomNameAlreadyExists)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -132,7 +132,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[6].String()).Return(sessionData, nil)
                 r.EXPECT().Create(sessionData.Username, "golang").Return(nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -149,7 +149,7 @@ func TestRoomController_CreateRoom(t *testing.T) {
         req, err := http.NewRequest("POST", url, c.body)
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+                Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,
@@ -188,7 +188,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
     const roomName = "golang"
     cases := []Case{
         {//no token
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             "dnp1",
             http.StatusUnauthorized,
         },
@@ -196,7 +196,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -208,7 +208,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[2].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -223,7 +223,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[3].String()).Return(sessionData, nil)
                 r.EXPECT().Delete(sessionData.Username, roomName).Return(room.ErrCouldNotDelete)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -239,7 +239,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[4].String()).Return(sessionData, nil)
                 r.EXPECT().Delete(sessionData.Username, roomName).Return(nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -255,7 +255,7 @@ func TestRoomController_DeleteRoom(t *testing.T) {
         req, err := http.NewRequest("DELETE", url, nil)
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+                Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,
@@ -298,7 +298,7 @@ func TestRoomController_EditRoom(t *testing.T) {
     const bodyExample = `{"name":"`+ newRoomName +`"}`
     cases := []Case{
         {//no token
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusUnauthorized,
@@ -307,7 +307,7 @@ func TestRoomController_EditRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -320,7 +320,7 @@ func TestRoomController_EditRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[2].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -333,7 +333,7 @@ func TestRoomController_EditRoom(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username:"dnp1"}, nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -349,7 +349,7 @@ func TestRoomController_EditRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[4].String()).Return(sessionData, nil)
                 r.EXPECT().Rename(sessionData.Username, oldRoomName, newRoomName).Return(room.ErrCouldNotRename)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -366,7 +366,7 @@ func TestRoomController_EditRoom(t *testing.T) {
                 sessionData := &session.Data{Username:"dnp1"}
                 s.EXPECT().Retrieve(tokens[5].String()).Return(sessionData, nil)
                 r.EXPECT().Rename(sessionData.Username, oldRoomName, newRoomName).Return(nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -383,7 +383,7 @@ func TestRoomController_EditRoom(t *testing.T) {
         req, err := http.NewRequest("PATCH", url, c.body)
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+                Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,
@@ -422,7 +422,7 @@ func TestRoomController_ListRooms(t *testing.T) {
     const bodyExample = `{"name":"`+ RoomName +`"}`
     cases := []Case{
         {//no token
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusUnauthorized,
@@ -431,7 +431,7 @@ func TestRoomController_ListRooms(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -446,7 +446,7 @@ func TestRoomController_ListRooms(t *testing.T) {
                 r := mock_room.NewMockRoom(mockCtrl)
                 s.EXPECT().Retrieve(tokens[2].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().All().Return(nil, room.ErrCouldNotRetrieveRooms)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -462,7 +462,7 @@ func TestRoomController_ListRooms(t *testing.T) {
                 r := mock_room.NewMockRoom(mockCtrl)
                 s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().All().Return([]room.Data{}, nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -479,7 +479,7 @@ func TestRoomController_ListRooms(t *testing.T) {
         req, err := http.NewRequest("GET", "/rooms", nil)
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+                Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,
@@ -520,7 +520,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
     const bodyExample = `{"name":"`+ roomName +`"}`
     cases := []Case{
         {//no token
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             "dnp1",
             strings.NewReader(bodyExample),
             http.StatusUnauthorized,
@@ -529,7 +529,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
             func() *gin.Engine {
                 s := mock_session.NewMockSession(mockCtrl)
                 s.EXPECT().Retrieve(tokens[1].String()).Return(nil, session.ErrTokenNotFound)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                 }
                 return rb.Build()
@@ -544,7 +544,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
                 r := mock_room.NewMockRoom(mockCtrl)
                 s.EXPECT().Retrieve(tokens[2].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().AllByUser(userName).Return(nil, room.ErrCouldNotRetrieveRooms)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -560,7 +560,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
                 r := mock_room.NewMockRoom(mockCtrl)
                 s.EXPECT().Retrieve(tokens[3].String()).Return(&session.Data{Username: "dnp1"}, nil)
                 r.EXPECT().AllByUser(userName).Return([]room.Data{}, nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     Session:s,
                     Room:r,
                 }
@@ -577,7 +577,7 @@ func TestRoomController_ListUserRooms(t *testing.T) {
         req, err := http.NewRequest("GET", url, nil)
         if tokens[i] != nil {
             req.AddCookie(&http.Cookie{
-                Name: server.TokenCookieName,
+                Name: rest.TokenCookieName,
                 Value: tokens[i].String(),
                 MaxAge: 24 * 60 * 60,
                 Secure: true,

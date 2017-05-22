@@ -6,7 +6,7 @@ import (
     "time"
     "net/http"
     "os"
-    "github.com/dnp1/conversa/conversa-server/server"
+    "github.com/dnp1/conversa/server/rest"
     _ "github.com/lib/pq"
     "database/sql"
 )
@@ -37,7 +37,7 @@ func main() {
         WriteTimeout: 60 * time.Second,
         ReadHeaderTimeout: 10 * time.Second,
         MaxHeaderBytes: 1 << 11,
-        Handler: server.NewRouter(db),
+        Handler: rest.NewRouter(db),
     }
 
     if err := srv.ListenAndServe(); err != nil {

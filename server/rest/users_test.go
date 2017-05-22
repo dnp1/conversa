@@ -1,4 +1,4 @@
-package server_test
+package rest_test
 
 import (
     "testing"
@@ -7,11 +7,11 @@ import (
     "github.com/stretchr/testify/assert"
     "net/http/httptest"
     "net/http"
-    "github.com/dnp1/conversa/conversa-server/server"
+    "github.com/dnp1/conversa/server/rest"
     "strings"
-    "github.com/dnp1/conversa/conversa-server/user"
+    "github.com/dnp1/conversa/server/user"
     "github.com/golang/mock/gomock"
-    "github.com/dnp1/conversa/conversa-server/mock_user"
+    "github.com/dnp1/conversa/server/mock_user"
     "errors"
 )
 
@@ -30,7 +30,7 @@ func TestSessionController_CreateUser(t *testing.T) {
     defer mockCtrl.Finish()
     cases := [...]Case {
         {
-            server.NewRouter(nil),
+            rest.NewRouter(nil),
             strings.NewReader(`{"user":sdasdas "`),
             http.StatusBadRequest,
         },
@@ -38,7 +38,7 @@ func TestSessionController_CreateUser(t *testing.T) {
             func() *gin.Engine {
                 u := mock_user.NewMockUser(mockCtrl)
                 u.EXPECT().Create("user", "senha","passphrase").Return(user.ErrPasswordConfirmationDoesNotMatch)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     User:u,
                 }
                 return rb.Build()
@@ -50,7 +50,7 @@ func TestSessionController_CreateUser(t *testing.T) {
             func() *gin.Engine {
                 u := mock_user.NewMockUser(mockCtrl)
                 u.EXPECT().Create("user", "passphrase","passphrase").Return(user.ErrUsernameAlreadyTaken)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     User:u,
                 }
                 return rb.Build()
@@ -62,7 +62,7 @@ func TestSessionController_CreateUser(t *testing.T) {
             func() *gin.Engine {
                 u := mock_user.NewMockUser(mockCtrl)
                 u.EXPECT().Create("user", "passphrase","passphrase").Return(errors.New("Unexpected error!!!"))
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     User:u,
                 }
                 return rb.Build()
@@ -74,7 +74,7 @@ func TestSessionController_CreateUser(t *testing.T) {
             func() *gin.Engine {
                 u := mock_user.NewMockUser(mockCtrl)
                 u.EXPECT().Create("user", "passphrase","passphrase").Return(nil)
-                rb := server.RouterBuilder{
+                rb := rest.RouterBuilder{
                     User:u,
                 }
                 return rb.Build()
