@@ -1,30 +1,48 @@
 package client
 
+type baseError struct {
+    fatal  bool
+    client bool
+    server bool
+}
+
+func (e *baseError) Server() bool {
+    return e.client
+}
+
+func (e *baseError) Fatal() bool {
+    return e.fatal
+}
+
+func (e *baseError) Client() bool {
+    return e.client
+}
+
+
 type Error interface {
     error
+    //Fatal means something are wrong in library it self
     Fatal() bool
+    //Server means something went wrong at server
     Server() bool
+    //Client means something on the request didn't matched the expected
+    Client() bool
 }
 
 type serverError struct {
     error
+    baseError
 }
 
-func newServer(err error) Error {
+func newServerError(err error) Error {
     if err == nil {
         return nil
     }
-    return &serverError{error:err}
+    return &serverError{
+        error:err,
+        baseError{server:true},
+    }
 }
-
-func (e *serverError) Server() bool {
-    return true
-}
-
-func (e *serverError) Fatal() bool {
-    return false
-}
-
 
 type fatalError struct {
     error
@@ -34,33 +52,40 @@ func newFatal(err error) Error {
     if err == nil {
         return nil
     }
-    return &fatalError{error:err}
-}
+    return &fatalError{
+        error:err,
+        baseError{fatal:true},
+    }
 
-func (e *fatalError) Server() bool {
-    return false
-}
-
-func (e *fatalError) Fatal() bool {
-    return true
 }
 
 type ordinaryError struct {
     error
+    baseError
 }
-
 
 func newError(err error) Error {
     if err == nil {
         return nil
     }
-    return &ordinaryError{error:err}
+    return &ordinaryError{
+        error:err,
+    }
 }
 
-func (e *ordinaryError) Server() bool {
-    return false
+
+type clientError struct {
+    error
+    baseError
 }
 
-func (e *ordinaryError) Fatal() bool {
-    return false
+
+func newClientError(err error) Error {
+    if err == nil {
+        return nil
+    }
+    return &clientError{
+        error:err,
+        baseError{client:true},
+    }
 }

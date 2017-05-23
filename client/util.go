@@ -10,16 +10,6 @@ import (
     "bytes"
 )
 
-var transport = &http.Transport{
-
-    TLSHandshakeTimeout:10 * time.Second,
-}
-
-var (
-    //errors
-    ErrInvalidTarget = errors.New("Invalid target!")
-)
-
 type RoomItem struct {
     Username string `json:"username"`
     Name     string `json:"name"`
@@ -39,16 +29,10 @@ type LoginBody struct {
     Password string `json:"password"`
 }
 
-type Requester interface {
-    NewRequest(method, endpoint string, body io.Reader) (*http.Request)
-    Do(req *http.Request, jar http.CookieJar) (*http.Response, error)
-    Request(method, endpoint string, body io.Reader, jar http.CookieJar) (*http.Response, error)
-}
 type ResponseBody struct {
     Message string `json:"message"`
-    Data json.RawMessage `json:"data"`
+    Data    json.RawMessage `json:"data"`
 }
-
 
 func ReadJSON(body io.Reader, refToData interface{}) error {
     if data, err := ioutil.ReadAll(body); err != nil {
@@ -64,7 +48,7 @@ func ReadResponseBody(body io.ReadCloser) (*ResponseBody, Error) {
     var respBody ResponseBody
 
     if err := ReadJSON(body, &respBody); err != nil {
-        return nil, newServer(err)
+        return nil, newServerError(err)
     }
     return &respBody, nil
 }
@@ -75,4 +59,32 @@ func JSONReader(data interface{}) (io.Reader, Error) {
     } else {
         return bytes.NewReader(js), nil
     }
+}
+
+func IsOkCode(code int) bool {
+    return code >= 200 && code < 300
+}
+
+func IsServerErrorCode(code int) bool {
+    return code >= 500 && code < 600
+}
+
+func IsClientErrorCode(code int) bool {
+    return code >= 400 && code < 500
+}
+
+func HttpError(body ResponseBody, code int) Error {
+    if IsOkCode(code) {
+        return nil
+    } else if IsServerErrorCode(code) {
+        err := errors.New(body.Message)
+        return newServerError(err)
+    } else if IsClientErrorCode(code) {
+        err := errors.New(body.Message)
+        return newServerError(err)
+    } else {
+        err := errors.New(body.Message)
+        return newError(err)
+    }
+
 }

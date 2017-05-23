@@ -1,72 +1,52 @@
 package client
 
 import (
-    "net/http/cookiejar"
     "net/http"
-    "net/url"
-    "log"
-    "encoding/json"
     "fmt"
-    "bytes"
-    "io/ioutil"
-    "io"
+    "errors"
 )
 
-
-type Session interface {
-    Logout() error
-    RoomCreate(name string) error
-    RoomList() ([]RoomData, error)
-    RoomRemove(name string) error
-    RoomRename(currentName string, newName string) error
+type client struct {
+    username string
+    requester Requester
 }
 
-type SessionBuilder struct {
-    Requester Requester
-    Target    string
-    Username  string
-    Cookies   []*http.Cookie
-}
-
-func (builder *SessionBuilder) Build() Session {
-    if jar, err := cookiejar.New(nil); err != nil {
-        log.Fatalln(err)
-    } else if u, err := url.Parse(builder.Target); err != nil {
-        log.Fatalln(err)
+func (c *client) Login(username, password string) Error {
+    body := LoginBody{Username:username, Password:password}
+    if jsReader, err := JSONReader(body); err != nil {
+        return err
     } else {
-        jar.SetCookies(u, builder.Cookies)
-        return &session{
-            requester:builder.Requester,
-            username:builder.Username,
-            jar: jar,
+        const endpoint = "/sessions"
+        if code, body, err :=
+            c.requester.SimpleRequest(
+                http.MethodPost,
+                endpoint,
+                jsReader,
+            ); err != nil {
+            return err
+        } else {
+            return HttpError(body, code)
         }
     }
-    return Session(nil)
-
 }
 
-type session struct {
-    requester Requester
-    jar       http.CookieJar
-    username  string
-}
 
-func (s *session) Logout() error {
+
+
+func (s *client) Logout() error {
     return nil
 }
 
-func (s *session) RoomCreate(name string) error {
+func (s *client) RoomCreate(name string) error {
     body := RoomBody{Name:name}
-    if js, err := json.Marshal(body); err != nil {
+    if reader, err := JSONReader(body); err != nil {
         return err //barely impossible
     } else {
-        reader := bytes.NewReader(js)
         endpoint := fmt.Sprintf("users/%s/rooms", s.username)
         if resp, err := s.requester.Request(
             http.MethodPost,
             endpoint,
             reader,
-            s.jar,
         ); err != nil {
             return err
         } else {
@@ -81,13 +61,12 @@ func (s *session) RoomCreate(name string) error {
     }
 }
 
-func (s *session) RoomList() ([]RoomItem, error) {
+func (s *client) RoomList() ([]RoomItem, error) {
     const endpoint = "/rooms"
     if resp, err := s.requester.Request(
         http.MethodGet,
         endpoint,
         nil,
-        s.jar,
     ); err != nil {
         return err
     } else {
@@ -105,13 +84,12 @@ func (s *session) RoomList() ([]RoomItem, error) {
     }
 }
 
-func (s *session) RoomRemove(name string) error {
+func (s *client) RoomRemove(name string) error {
     endpoint := fmt.Sprintf("/users/%s/rooms/%s", s.username, name)
     if resp, err := s.requester.Request(
         http.MethodDelete,
         endpoint,
         nil,
-        s.jar,
     ); err != nil {
         return err
     } else {
@@ -124,20 +102,24 @@ func (s *session) RoomRemove(name string) error {
     return nil
 }
 
-func (s *session) RoomRename(currentName string, newName string) error {
+func (s *client) RoomRename(currentName string, newName string) error {
     body := RoomBody{Name:newName}
-    if js, err := json.Marshal(body); err != nil {
-        return err //barely impossible
+    if reader, err := JSONReader(body); err != nil {
+        return err
     } else if {
         endpoint := fmt.Sprintf("/users/%s/rooms/%s", s.username, currentName)
-        if resp, err := s.requester.Request(
+        if code, resp,  err := s.requester.SimpleRequest(
             http.MethodDelete,
             endpoint,
-            nil,
-            s.jar,
+            reader,
         ); err != nil {
             return err
+        } else if IsServerErrorCode(code) {
+            return newServerError(errors.New(resp.Message))
+        } else {
+
         }
     }
+    return nil
 }
 
