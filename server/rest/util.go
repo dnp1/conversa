@@ -8,7 +8,7 @@ import (
 type ResponseBody struct {
     Status  int `json:"-"`
     Message string `json:"message"`
-    Data    interface{} `json:"data,ommitempty"`
+    Data    interface{} `json:"data"`
     Err     error `json:"-"`
 }
 

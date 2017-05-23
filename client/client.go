@@ -1,13 +1,9 @@
 package client
 
 import (
-    "encoding/json"
-    "fmt"
-    "bytes"
     "net/http"
-    "time"
-    "log"
-    "io"
+    "net/url"
+    "errors"
 )
 
 type Client interface {
@@ -19,67 +15,52 @@ type Builder struct {
     Target string `json:"target"`
 }
 
-func (builder Builder) Build() Client {
+func (builder Builder) Build() (Client, Error) {
+    if _, err := url.ParseRequestURI(builder.Target); err != nil {
+        return nil, err
+    }
     return &client{
-        target:builder.Target,
+        requester{target:builder.Target},
     }
 }
 
 type client struct {
-    target string
+    requester
 }
 
-func (c *client) NewRequest(method, endpoint string, body io.Reader) (*http.Request) {
-    path := c.target + endpoint
-    if req, err := http.NewRequest(method, path, body); err != nil {
-        log.Fatalln(err)
-        return nil
-    } else {
-        if body != nil {
-            req.Header.Set("Content-Type", "application/json")
-        }
-        return req
-    }
-}
-
-func (c *client) Do(req *http.Request, jar http.CookieJar) (*http.Response, error) {
-    c := &http.Client{
-        Transport:transport,
-        Timeout: time.Second * 15,
-        Jar: jar,
-    }
-    return c.Do(req)
-}
-
-func (c *client) Request(method, endpoint string, body io.Reader, jar http.CookieJar) (*http.Response, error) {
-    req := c.NewRequest(method, endpoint, body)
-    return c.Do(req, jar)
-}
-
-func (c *client) Login(username, password string) (Session, error) {
-    if c.target == "" {
-        return ErrInvalidTarget
-    }
+func (c *client) Login(username, password string) (Session, Error) {
     body := LoginBody{Username:username, Password:password}
-    if js, err := json.Marshal(body); err != nil {
-        return err //barely impossible
+    if jsReader, err := JSONReader(body); err != nil {
+        return err
     } else {
-        bodyReader := bytes.NewReader(js)
-        req := c.NewRequest(http.MethodPost, "/sessions", bodyReader, )
-        if resp, err := c.Do(req, nil); err != nil {
+        const endpoint = "/sessions"
+        if resp, err :=
+            c.Request(
+                http.MethodPost,
+                endpoint,
+                jsReader,
+                nil,
+            ); err != nil {
             return nil, err
         } else {
-            defer resp.Body.Close()
-            if resp.StatusCode == http.StatusCreated {
-                //TODO:Create_Session
-                return nil, nil
+            if respBody, err := ReadResponseBody(resp.Body); err != nil {
+                return nil, err
             } else {
-                return fmt.Errorf("Error Status: %d", resp.StatusCode)
+                if code := resp.StatusCode; code == http.StatusCreated {
+                    //TODO:Create_Session
+                    return nil, nil
+                } else if IsServerErrorCode(code) {
+                    return newServer(errors.New(respBody.Message))
+                }
             }
         }
     }
+    return nil, nil
 }
 
+func IsServerErrorCode(code int) bool {
+    return code >= 500 && code < 600
+}
 
 
 

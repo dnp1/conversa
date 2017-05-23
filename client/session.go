@@ -10,8 +10,8 @@ import (
     "bytes"
     "io/ioutil"
     "io"
-    "github.com/dnp1/conversa/conversa-cli/cl"
 )
+
 
 type Session interface {
     Logout() error
@@ -52,7 +52,7 @@ type session struct {
 }
 
 func (s *session) Logout() error {
-
+    return nil
 }
 
 func (s *session) RoomCreate(name string) error {
@@ -123,20 +123,21 @@ func (s *session) RoomRemove(name string) error {
     }
     return nil
 }
+
 func (s *session) RoomRename(currentName string, newName string) error {
     body := RoomBody{Name:newName}
     if js, err := json.Marshal(body); err != nil {
         return err //barely impossible
     } else if {
         endpoint := fmt.Sprintf("/users/%s/rooms/%s", s.username, currentName)
+        if resp, err := s.requester.Request(
+            http.MethodDelete,
+            endpoint,
+            nil,
+            s.jar,
+        ); err != nil {
+            return err
+        }
     }
 }
 
-func ReadJSON(body io.Reader, refToData interface{}) error {
-    if data, err := ioutil.ReadAll(body); err != nil {
-        return err
-    } else if err := json.Unmarshal(data, refToData); err != nil {
-        return err
-    }
-    return nil
-}
