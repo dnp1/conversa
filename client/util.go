@@ -46,8 +46,9 @@ func ReadJSON(body io.Reader, refToData interface{}) error {
 func ReadResponseBody(body io.ReadCloser) (*ResponseBody, Error) {
     defer body.Close()
     var respBody ResponseBody
-
-    if err := ReadJSON(body, &respBody); err != nil {
+    const kb = 1024
+    limitedReader := io.LimitReader(body, 500 * kb)
+    if err := ReadJSON(limitedReader, &respBody); err != nil {
         return nil, newServerError(err)
     }
     return &respBody, nil
