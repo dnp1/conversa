@@ -9,7 +9,7 @@ import (
 
 type Requester interface {
     NewRequest(method, endpoint string, body io.Reader) (*http.Request)
-    Do(req *http.Request, jar http.CookieJar) (*http.Response, error)
+    Do(req *http.Request) (*http.Response, error)
     Request(method, endpoint string, body io.Reader, jar http.CookieJar) (*http.Response, error)
     SimpleRequest(method, endpoint string, body io.Reader, jar http.CookieJar) (code int, response *ResponseBody, err Error)
 }
