@@ -1,8 +1,6 @@
 package client
 
 import (
-    "time"
-    "net/http"
     "errors"
     "io"
     "io/ioutil"

@@ -50,8 +50,7 @@ func newRequester(target string, cookies  []*http.Cookie) (Requester, Error) {
 func (r *requester) NewRequest(method, endpoint string, body io.Reader) (*http.Request, Error) {
     path := r.target + endpoint
     if req, err := http.NewRequest(method, path, body); err != nil {
-        newFatal(err)
-        return nil
+        return newFatal(err)
     } else {
         if body != nil {
             req.Header.Set("Content-Type", "application/json")
