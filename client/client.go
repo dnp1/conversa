@@ -23,10 +23,6 @@ type ClientBuilder struct {
 }
 
 func (builder ClientBuilder) Build() (Client, Error) {
-    if _, err := url.ParseRequestURI(builder.Target); err != nil {
-        return nil, newFatal(err)
-    }
-
     if requester, err := newRequester(builder.Target, builder.Cookies); err != nil{
         return nil, err
     } else {

@@ -5,6 +5,7 @@ import (
     "net/http"
     "io"
     "net/http/cookiejar"
+    "net/url"
 )
 
 type Requester interface {
@@ -20,6 +21,9 @@ type requester struct {
 }
 
 func newRequester(target string, cookies  []*http.Cookie) (Requester, Error) {
+    if _, err := url.ParseRequestURI(target); err != nil {
+        return nil, newFatal(err)
+    }
     var jar, err = cookiejar.New(nil)
     if err != nil {
         return nil, newFatal(err)
