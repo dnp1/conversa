@@ -4,7 +4,7 @@ import (
     "testing"
     "gopkg.in/DATA-DOG/go-sqlmock.v1"
     "github.com/stretchr/testify/assert"
-    "github.com/dnp1/conversa/server/room"
+    "github.com/dnp1/conversa/server/model/room"
     "github.com/pkg/errors"
     "database/sql"
 )

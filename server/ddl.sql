@@ -33,17 +33,9 @@ CREATE TABLE "messages"(
     "edition_date" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
 );
 
-CREATE TABLE "badwords"(
+CREATE TABLE "bad_words"(
     "id" serial PRIMARY KEY,
     "room_id" INT REFERENCES "room"("id") NOT NULL,
     "word" TEXT NOT NULL,
     "creation_datetime" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
 );
-
-
-
-INSERT INTO "message"("room_id", "user_id", "content")
-    SELECT r.id, u.id, $4
-        FROM room
-        LEFT JOIN "user" u ON u.username = $3
-        r WHERE r.name = $1 AND r.username = $2

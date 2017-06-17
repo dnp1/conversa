@@ -1,9 +1,9 @@
-package rest
+package controller
 
 import (
     "net/http"
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/server/session"
+    "github.com/dnp1/conversa/server/model/session"
     "time"
 )
 

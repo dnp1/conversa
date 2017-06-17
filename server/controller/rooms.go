@@ -1,8 +1,8 @@
-package rest
+package controller
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/server/room"
+    "github.com/dnp1/conversa/server/model/room"
     "net/http"
 )
 

@@ -4,7 +4,7 @@
 package mock_room
 
 import (
-	room "github.com/dnp1/conversa/server/room"
+	room "github.com/dnp1/conversa/server/model/room"
 	gomock "github.com/golang/mock/gomock"
 )
 

@@ -3,7 +3,7 @@ package user_test
 import (
     "testing"
     "gopkg.in/DATA-DOG/go-sqlmock.v1"
-    "github.com/dnp1/conversa/server/user"
+    "github.com/dnp1/conversa/server/model/user"
     "github.com/stretchr/testify/assert"
     "github.com/pkg/errors"
     "golang.org/x/crypto/bcrypt"

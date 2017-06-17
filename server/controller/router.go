@@ -1,16 +1,14 @@
-package rest
+package controller
 
 import (
     "gopkg.in/gin-gonic/gin.v1"
-    "github.com/dnp1/conversa/server/session"
-    "github.com/dnp1/conversa/server/user"
-    "github.com/dnp1/conversa/server/room"
-    "database/sql"
-    "github.com/dnp1/conversa/server/message"
+    "github.com/dnp1/conversa/server/model/session"
+    "github.com/dnp1/conversa/server/model/user"
+    "github.com/dnp1/conversa/server/model/room"
+    "github.com/dnp1/conversa/server/model/message"
 )
 
 type RouterBuilder struct {
-    db      *sql.DB
     Session session.Session
     User    user.User
     Room    room.Room
@@ -54,13 +52,4 @@ func (rb *RouterBuilder) Build() *gin.Engine {
     return r
 }
 
-func NewRouter(db *sql.DB) *gin.Engine {
-    builder := RouterBuilder{
-        Session: session.Builder{DB:db}.Build(),
-        User: user.Builder{DB:db}.Build(),
-        Room: room.Builder{DB:db}.Build(),
-        Message: message.Builder{DB:db}.Build(),
-    }
-    return builder.Build()
-}
 

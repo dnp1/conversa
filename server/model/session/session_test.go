@@ -2,7 +2,7 @@ package session_test
 
 import (
     "testing"
-    "github.com/dnp1/conversa/server/session"
+    "github.com/dnp1/conversa/server/model/session"
     "gopkg.in/DATA-DOG/go-sqlmock.v1"
     "database/sql"
     "github.com/stretchr/testify/assert"
