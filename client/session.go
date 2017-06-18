@@ -42,7 +42,7 @@ func (s *client) RoomCreate(name string) error {
     if reader, err := JSONReader(body); err != nil {
         return err //barely impossible
     } else {
-        endpoint := fmt.Sprintf("users/%s/rooms", s.username)
+        endpoint := fmt.Sprintf("users/%s/room", s.username)
         if resp, err := s.requester.Request(
             http.MethodPost,
             endpoint,
@@ -62,7 +62,7 @@ func (s *client) RoomCreate(name string) error {
 }
 
 func (s *client) RoomList() ([]RoomItem, error) {
-    const endpoint = "/rooms"
+    const endpoint = "/room"
     if resp, err := s.requester.Request(
         http.MethodGet,
         endpoint,
@@ -85,7 +85,7 @@ func (s *client) RoomList() ([]RoomItem, error) {
 }
 
 func (s *client) RoomRemove(name string) error {
-    endpoint := fmt.Sprintf("/users/%s/rooms/%s", s.username, name)
+    endpoint := fmt.Sprintf("/users/%s/room/%s", s.username, name)
     if resp, err := s.requester.Request(
         http.MethodDelete,
         endpoint,
@@ -107,7 +107,7 @@ func (s *client) RoomRename(currentName string, newName string) error {
     if reader, err := JSONReader(body); err != nil {
         return err
     } else if {
-        endpoint := fmt.Sprintf("/users/%s/rooms/%s", s.username, currentName)
+        endpoint := fmt.Sprintf("/users/%s/room/%s", s.username, currentName)
         if code, resp,  err := s.requester.SimpleRequest(
             http.MethodDelete,
             endpoint,

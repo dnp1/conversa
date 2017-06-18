@@ -1,52 +1,29 @@
 package message
 
 import (
-    "time"
     "database/sql"
     "strings"
-    "errors"
+    "github.com/dnp1/conversa/server/errors"
+    "github.com/dnp1/conversa/server/data/message"
 )
 
 var (//errors
-    ErrMessageIsEmpty = errors.New("Message is empty, invalid!")
-    ErrCouldNotFound = errors.New("Unexisting data") //TODO:improve it
+    ErrMessageIsEmpty = errors.Validation(errors.FromString("Message is empty, invalid!"))
 )
 
-type Data struct {
-    ID int64 `json:"id"`
-    RoomID int64 `json:"roomId"`
-    UserID int64 `json:"userId"`
-    Username string `json:"username"`
-    Content string `json:"content"`
-    CreationDate time.Time
-    EditionDate time.Time
-}
 
-
-type Message interface {
-    Create(username , roomName, senderName, content string) error
-    Edit(username, roomName, messageOwner, message, content string) error
-    Delete(username, roomName, message, messageOwner string) error
-    All(username , roomName string, limit, offset int64) ([]Data, error)
-}
-
-type Builder struct {
-    DB *sql.DB
-}
-
-
-func (builder Builder) Build() Message {
-    return &message{
-        db: builder.DB,
+func New(db *sql.DB) *model {
+    return &model{
+        db: db,
     }
 }
 
-type message struct {
+type model struct {
     db *sql.DB
 }
 
-func (m *message) Create(username , roomName, senderName, content string) error {
-    const query = `INSERT INTO "message"("room_id", "user_id", "content")
+func (m *model) Create(username , roomName, senderName, content string) errors.Error {
+    const query = `INSERT INTO "model"("room_id", "user_id", "content")
     SELECT r.id, u.id, $4
         FROM room r
         LEFT JOIN "user" u ON u.username = $3
@@ -60,19 +37,19 @@ func (m *message) Create(username , roomName, senderName, content string) error 
     }
 
     if err := m.db.QueryRow(query, username, roomName, senderName, content).Scan(&id); err == sql.ErrNoRows {
-        return ErrCouldNotFound
+        return errors.Validation(err)
     } else if err != nil {
-        return err
+        return errors.Internal(err)
     }
 
     return nil
 }
 
-func (m *message) Edit(username, roomName, messageOwner, message, content string) error{
+func (m *model) Edit(username, roomName, messageOwner, message, content string) errors.Error {
     const query = `
     WITH (
         SELECT m.id as "msg_id", r.id as "room_id", u.id as "user_id"
-                FROM message m
+                FROM model m
                 INNER JOIN room r ON r.id = m.room_id
                 INNER JOIN "user" u ON u.id = m.user_id
                 WHERE
@@ -80,10 +57,10 @@ func (m *message) Edit(username, roomName, messageOwner, message, content string
                     u.username = $3
                     AND r.name = $1 AND r.username = $2
     ) AS "t"
-    UPDATE "message" SET "content" = $5
-        WHERE "message".id = t.msg_id
-        AND message.room_id = t.room_id
-        AND message.user_id = t.user_id
+    UPDATE "model" SET "content" = $5
+        WHERE "model".id = t.msg_id
+        AND model.room_id = t.room_id
+        AND model.user_id = t.user_id
     RETURNING id;`
 
     var id int64
@@ -93,19 +70,20 @@ func (m *message) Edit(username, roomName, messageOwner, message, content string
     }
 
     if err := m.db.QueryRow(query, username, roomName, messageOwner, message, content).Scan(&id); err == sql.ErrNoRows {
-        return ErrCouldNotFound
+        return errors.Validation(
+            errors.FromString("Apparently the message does'nt exists or aren't owned by you"))
     } else if err != nil {
-        return err
+        return errors.Internal(err)
     }
 
     return nil
 }
 
-func (m *message) Delete(username, roomName, message, messageOwner string) error{
+func (m *model) Delete(username, roomName, message, messageOwner string) errors.Error {
     const query = `
     WITH (
         SELECT m.id as "msg_id", r.id as "room_id", u.id as "user_id"
-                FROM message m
+                FROM model m
                 INNER JOIN room r ON r.id = m.room_id
                 INNER JOIN "user" u ON u.id = m.user_id
                 WHERE
@@ -113,23 +91,23 @@ func (m *message) Delete(username, roomName, message, messageOwner string) error
                     u.username = $3
                     AND r.name = $1 AND r.username = $2
     ) AS "t"
-    DELETE FROM "message"
-        WHERE "message".id = t.msg_id
-        AND message.room_id = t.room_id
-        AND message.user_id = t.user_id
+    DELETE FROM "model"
+        WHERE "model".id = t.msg_id
+        AND model.room_id = t.room_id
+        AND model.user_id = t.user_id
     RETURNING id;`
 
     var id int64
     if err := m.db.QueryRow(query, username, roomName, messageOwner, message).Scan(&id); err == sql.ErrNoRows {
-        return ErrCouldNotFound
+        return errors.Empty(err)
     } else if err != nil {
-        return err
+        return errors.Internal(err)
     }
 
     return nil
 }
 
-func (m *message) All(username , roomName string, limit, offset int64) ([]Data, error) {
+func (m *model) All(username , roomName string, limit, offset int64) ([]message.Data, errors.Error) {
 
     return nil,nil
 }

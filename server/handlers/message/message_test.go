@@ -1,4 +1,4 @@
-package controller_test
+package message_test
 
 import "testing"
 

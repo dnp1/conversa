@@ -134,7 +134,7 @@ func (cl *client) RoomCreate(name string) error {
         return err //barely impossible
     } else {
         client := cl.HttpClient()
-        url := fmt.Sprintf("%s/users/%s/rooms", cl.config.Target, cl.config.Username)
+        url := fmt.Sprintf("%s/users/%s/room", cl.config.Target, cl.config.Username)
         if resp, err := client.Post(url, JsonContentType, bytes.NewReader(js)); err != nil {
             return err
         } else {
@@ -154,7 +154,7 @@ func (cl *client) RoomList() ([]RoomData, error) {
         return nil, ErrInvalidTarget
     }
     client := cl.HttpClient()
-    url := fmt.Sprintf("%s/rooms", cl.config.Target)
+    url := fmt.Sprintf("%s/room", cl.config.Target)
     if resp, err := client.Get(url); err != nil {
         return nil, err
     } else {
@@ -180,7 +180,7 @@ func (cl *client) RoomsUserList(username string) ([]RoomData, error) {
         return nil, ErrInvalidTarget
     }
     client := cl.HttpClient()
-    url := fmt.Sprintf("%s/users/%s/rooms", cl.config.Target, cl.config.Username)
+    url := fmt.Sprintf("%s/users/%s/room", cl.config.Target, cl.config.Username)
     if resp, err := client.Get(url); err != nil {
         return nil, err
     } else if resp.StatusCode == http.StatusOK {
@@ -202,7 +202,7 @@ func (cl *client) RoomRemove(name string) error {
         return ErrInvalidTarget
     }
     client := cl.HttpClient()
-    url := fmt.Sprintf("%s/users/%s/rooms/%s", cl.config.Target, cl.config.Username, name)
+    url := fmt.Sprintf("%s/users/%s/room/%s", cl.config.Target, cl.config.Username, name)
     if req, err := http.NewRequest("DELETE", url, nil); err != nil {
         return err
     } else {
@@ -225,7 +225,7 @@ func (cl *client) RoomRename(currentName string, newName string) error {
         return err //barely impossible
     } else {
         client := cl.HttpClient()
-        url := fmt.Sprintf("%s/users/%s/rooms/%s", cl.config.Target, cl.config.Username, currentName)
+        url := fmt.Sprintf("%s/users/%s/room/%s", cl.config.Target, cl.config.Username, currentName)
         if req, err := http.NewRequest("PATCH", url, bytes.NewReader(js)); err != nil {
             return err
         } else {

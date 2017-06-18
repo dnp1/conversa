@@ -6,13 +6,19 @@ import (
     "time"
     "net/http"
     "os"
-    "github.com/dnp1/conversa/server/controller"
     _ "github.com/lib/pq"
     "database/sql"
-    "github.com/dnp1/conversa/server/model/room"
-    "github.com/dnp1/conversa/server/model/session"
-    "github.com/dnp1/conversa/server/model/user"
-    "github.com/dnp1/conversa/server/model/message"
+    "github.com/dnp1/conversa/server/controller"
+    authenticationHandlers "github.com/dnp1/conversa/server/handlers/authentication"
+    roomHandlers "github.com/dnp1/conversa/server/handlers/room"
+    userHandlers "github.com/dnp1/conversa/server/handlers/user"
+    sessionHandlers "github.com/dnp1/conversa/server/handlers/session"
+    sessionModel "github.com/dnp1/conversa/server/model/session"
+    messageHandlers "github.com/dnp1/conversa/server/handlers/message"
+    userModel "github.com/dnp1/conversa/server/model/user"
+    "golang.org/x/crypto/bcrypt"
+    roomModel "github.com/dnp1/conversa/server/model/room"
+    messageModel "github.com/dnp1/conversa/server/model/message"
 )
 
 func env(key string, defaultVal string) string {
@@ -32,15 +38,22 @@ func main() {
         log.Fatalln(err)
     }
 
-    host := env("HOST", "0.0.0.0")
-    port := env("PORT", "5001")
-    router := controller.RouterBuilder{
-        Session: session.Builder{DB:db}.Build(),
-        User: user.Builder{DB:db}.Build(),
-        Room: room.Builder{DB:db}.Build(),
-        Message: message.Builder{DB:db}.Build(),
-    }.Build()
+    authenticationCookieName := env("CONVERSA_AUTHENTICATION_COOKIE_NAME", "Authentication")
+    session := sessionModel.New(db)
+    user := userModel.New(db, bcrypt.DefaultCost)
+    room := roomModel.New(db)
+    message := messageModel.New(db)
 
+    router := controller.New(&controller.Handlers{
+        Authentication: authenticationHandlers.New(authenticationCookieName, session),
+        Message: messageHandlers.New(message),
+        Session: sessionHandlers.New(session),
+        Room: roomHandlers.New(room),
+        User: userHandlers.New(user),
+    })
+
+    host := env("HOST", "0.0.0.0")
+    port := env("PORT", "8080")
     srv := &http.Server{
         Addr:              fmt.Sprintf("%s:%s", host, port),
         ReadTimeout:       60 * time.Second,

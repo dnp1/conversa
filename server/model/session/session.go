@@ -1,92 +1,62 @@
 package session
 
 import (
-    "github.com/pkg/errors"
     "database/sql"
     "golang.org/x/crypto/bcrypt"
 
     "github.com/twinj/uuid"
+    "github.com/dnp1/conversa/server/errors"
+    "github.com/dnp1/conversa/server/data/session"
 )
 
-var (
-    ErrBadCredentials = errors.New("Bad credentials")
-    ErrTokenNotFound = errors.New("Token not found")
-)
 
-type Data struct {
-    UserID int64
-    Username string
-}
-
-type Session interface {
-    Create(username string, password string) (token string, err error)
-    Delete(token string) error
-    Valid(token string) error
-    Retrieve(token string) (*Data, error)
-}
-
-type Builder struct {
-    DB *sql.DB
-}
-
-func (builder Builder) Build() Session {
-    return &session{
-        db: builder.DB,
+func  New(db *sql.DB) *model {
+    return &model{
+        db: db,
     }
 }
 
-type session struct {
+type model struct {
     db *sql.DB
 }
 
-func (s *session) Create(username string, password string) (string, error) {
+func (s *model) Create(username string, password string) (string, errors.Error) {
     var (
         hashedPassword string
         userID int64
     )
     const selQuery = `SELECT password, id FROM "user" WHERE username = $1;`
     if err := s.db.QueryRow(selQuery, username).Scan(&hashedPassword, &userID); err == sql.ErrNoRows {
-        return "", ErrBadCredentials
+        return "", errors.Empty(err)
     } else if err != nil {
-        return "", err
+        return "", errors.Internal(err)
     } else  if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
-        return "", ErrBadCredentials
+        return "", errors.Validation(err)
     }
 
     key := uuid.NewV4().String()
     const insQuery = `INSERT INTO "user_session"("session_key", "user_id") VALUES($1, $2);`
     if _, err := s.db.Exec(insQuery, key, userID); err != nil {
-        return "", err
+        return "", errors.Internal(err)
     }
 
     return key, nil
 }
 
-func (s *session) Delete(token string) error {
+func (s *model) Delete(token string) errors.Error {
     const query = `DELETE FROM "user_session" WHERE session_key = $1 RETURNING "id"`
-    if _, err := s.db.Exec(query, token); err != nil {
-        return err
-    }
-    return nil
-}
-
-func (s *session) Valid(token string) error {
-    var exists bool;
-    const query = `SELECT true FROM "user_session" WHERE session_key = $1`
-    if err := s.db.QueryRow(query, token).Scan(&exists); err != nil {
+    var id int64
+    if err := s.db.QueryRow(query, token).Scan(&id); err != nil {
         if err == sql.ErrNoRows {
-            return  ErrTokenNotFound
-        } else {
-            return err
+            return errors.Empty(err)
         }
-    } else if !exists {
-        return  ErrTokenNotFound
+        return errors.Internal(err)
     }
     return nil
 }
 
-func (s *session) Retrieve(token string) (*Data, error) {
-    var data Data
+func (s *model) Retrieve(token string) (*session.Data, errors.Error) {
+    var data session.Data
 
     const query = `SELECT u.username, s.user_id
         FROM "user_session" s
@@ -95,9 +65,9 @@ func (s *session) Retrieve(token string) (*Data, error) {
         `
     if err := s.db.QueryRow(query, token).Scan(&data.Username, &data.UserID); err != nil {
         if err == sql.ErrNoRows {
-            return  nil, ErrTokenNotFound
+            return  nil, errors.Empty(err)
         } else {
-            return nil, err
+            return nil, errors.Internal(err)
         }
     }
     return &data, nil
