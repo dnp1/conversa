@@ -16,9 +16,6 @@ const (
 
 var (
     ErrRoomNameAlreadyExists = errors.Conflict(errors.FromString("Couldn't insert!"))
-    ErrCouldNotDelete        = errors.FromString("Couldn't delete!")
-    ErrCouldNotRename        = errors.FromString("Couldn't rename!")
-    ErrCouldNotRetrieveRooms = errors.FromString("Select has failed!")
     ErrRoomNameWrongLength   = errors.Validation(fmt.Errorf(
         "Model's name length is invalid, mininum is %d and maximum is %d",
         NameMinLength,

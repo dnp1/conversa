@@ -19,6 +19,7 @@ import (
     "golang.org/x/crypto/bcrypt"
     roomModel "github.com/dnp1/conversa/server/model/room"
     messageModel "github.com/dnp1/conversa/server/model/message"
+    "github.com/dnp1/conversa/server/handlers/channel"
 )
 
 func env(key string, defaultVal string) string {
@@ -50,6 +51,7 @@ func main() {
         Session: sessionHandlers.New(session),
         Room: roomHandlers.New(room),
         User: userHandlers.New(user),
+        Channel: channel.New(message),
     })
 
     host := env("HOST", "0.0.0.0")

@@ -237,36 +237,6 @@ func main() {
             },
         },
         {
-            Name: "room-rename",
-            Usage: "-n `name` -to `new-name`",
-            Flags:[]cli.Flag{
-                cli.StringFlag{
-                    Name:  "name, n",
-                    Usage: "-n `name`",
-                },
-                cli.StringFlag{
-                    Name:  "new-name, to",
-                    Usage: "-to `name`",
-                },
-            },
-            Action:  func(c *cli.Context) error {
-                var name = c.String("name")
-                if name == "" {
-                    name = readString("Room name")
-                }
-                var newName = c.String("new-name")
-                if newName == "" {
-                    newName = readString("New Room Name")
-                }
-
-
-                if err := client.RoomRename(name, newName); err != nil {
-                    cli.NewMultiError(err)
-                }
-                return nil
-            },
-        },
-        {
             Name: "room-remove",
             Usage: "-n `name`",
             Flags:[]cli.Flag{

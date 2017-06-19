@@ -83,15 +83,6 @@ func (cl *cl) RoomRemove(name string) requester.Error {
     return cl.requester.Request(http.MethodDelete, path, nil, &EmptyResponse{})
 }
 
-func (cl *cl) RoomRename(currentName string, newName string) requester.Error {
-    if cl.username == "" {
-        return ErrNotLoggedIn
-    }
-    path := fmt.Sprintf("/users/%s/room/%s", cl.username, currentName)
-    body := RoomBody{Name:newName}
-    return cl.requester.Request(http.MethodPatch, path, body, &EmptyResponse{})
-}
-
 func (cl *cl) SignUp(username, password, passwordConfirmation string) requester.Error {
     path := fmt.Sprintf("/user")
     body := SignUp{
@@ -100,4 +91,35 @@ func (cl *cl) SignUp(username, password, passwordConfirmation string) requester.
         PasswordConfirmation: passwordConfirmation,
     }
     return cl.requester.Request(http.MethodPost, path, body, &EmptyResponse{})
+}
+
+func (cl *cl) MessageCreate(user, room, content string) requester.Error {
+    if cl.username == "" {
+        return ErrNotLoggedIn
+    }
+    path := fmt.Sprintf("/user/%s/room/%s/message", user, room)
+    body := MessageBody{
+        Content: content,
+    }
+    return cl.requester.Request(http.MethodPost, path, body, &EmptyResponse{})
+}
+
+
+func (cl *cl) MessageEdit(user, room, messageId, content string) requester.Error {
+    if cl.username == "" {
+        return ErrNotLoggedIn
+    }
+    path := fmt.Sprintf("/user/%s/room/%s/message/%s", user, room, messageId)
+    body := MessageBody{
+        Content: content,
+    }
+    return cl.requester.Request(http.MethodPatch, path, body, &EmptyResponse{})
+}
+
+func (cl *cl) Delete(user, room, messageId string) requester.Error {
+    if cl.username == "" {
+        return ErrNotLoggedIn
+    }
+    path := fmt.Sprintf("/user/%s/room/%s/message/%s", user, room, messageId)
+    return cl.requester.Request(http.MethodDelete, path, nil, &EmptyResponse{})
 }

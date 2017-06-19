@@ -28,6 +28,9 @@ type ( // dependencies
         Edit (req handlers.Context, resp handlers.JsonResponse)
         Delete (req handlers.Context, resp handlers.JsonResponse)
     }
+    Channel interface {
+        Listen(context handlers.ChannelContext)
+    }
 )
 
 type Handlers struct {
@@ -36,24 +39,25 @@ type Handlers struct {
     Session        Session
     Room           Room
     Message        Message
+    Channel        Channel
 }
 
 func New(handlers *Handlers) *gin.Engine {
     r := gin.Default()
-    r.POST("/session", Wrap(handlers.Session.Login))
-    r.POST("/user",  Wrap(handlers.User.Create))
-    r.DELETE("/session",  Wrap(handlers.Session.Logout))
+    r.POST("/session", WrapContext(handlers.Session.Login))
+    r.POST("/user",  WrapContext(handlers.User.Create))
+    r.DELETE("/session",  WrapContext(handlers.Session.Logout))
 
     authenticated := r.Group("")
-    authenticated.Use(Wrap(handlers.Authentication.Middleware)) //TODO:CheckWrap for middlewares
-    authenticated.GET("/room", Wrap(handlers.Room.List))
-    authenticated.GET("/user/:user/room/:room/messages", Wrap(handlers.Message.List))
-    authenticated.POST("/user/:user/room", Wrap(handlers.Room.Create))
-    authenticated.DELETE("/user/:user/room/:room", Wrap(handlers.Room.Delete))
-    authenticated.PATCH("/user/:user/room/:room", Wrap(handlers.Room.Edit))
-    authenticated.POST("/user/:user/room/:room/message", Wrap(handlers.Message.Create))
-    authenticated.PATCH("/user/:user/room/:room/message/:message", Wrap(handlers.Message.Edit))
-    authenticated.DELETE("/user/:user/room/:room/message/:message", Wrap(handlers.Message.Delete))
+    authenticated.Use(WrapContext(handlers.Authentication.Middleware)) //TODO:CheckWrap for middlewares
+    authenticated.GET("/room", WrapContext(handlers.Room.List))
+    authenticated.GET("/user/:user/room/:room/messages", WrapContext(handlers.Message.List))
+    authenticated.GET("/user/:user/room/:room/listen", WrapChannelContext(handlers.Channel.Listen))
+    authenticated.POST("/user/:user/room", WrapContext(handlers.Room.Create))
+    authenticated.DELETE("/user/:user/room/:room", WrapContext(handlers.Room.Delete))
+    authenticated.POST("/user/:user/room/:room/message", WrapContext(handlers.Message.Create))
+    authenticated.PATCH("/user/:user/room/:room/message/:message", WrapContext(handlers.Message.Edit))
+    authenticated.DELETE("/user/:user/room/:room/message/:message", WrapContext(handlers.Message.Delete))
     return r
 }
 

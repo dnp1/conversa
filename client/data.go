@@ -1,7 +1,5 @@
 package client
 
-type empty struct{}
-
 type ResponseBody struct {
     Success bool `json:"success"`
     Message string `json:"message"`
@@ -9,7 +7,6 @@ type ResponseBody struct {
 
 type EmptyResponse struct {
     ResponseBody
-    Data *empty `json:"data"`
 }
 
 type RoomItem struct {
@@ -24,6 +21,10 @@ type RoomData struct {
 
 type RoomBody struct {
     Name string `json:"name"`
+}
+
+type MessageBody struct {
+    Content string `json:"content"`
 }
 
 type LoginBody struct {

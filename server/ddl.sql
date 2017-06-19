@@ -30,7 +30,7 @@ CREATE TABLE "messages"(
     "user_id" INT REFERENCES "user"("id") NOT NULL,
     "content" TEXT NOT NULL,
     "creation_datetime" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2),
-    "edition_date" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
+    "edition_datetime" TIMESTAMP(2) WITHOUT TIME ZONE NOT NULL DEFAULT current_timestamp(2)
 );
 
 CREATE TABLE "bad_words"(

@@ -9,7 +9,13 @@ import (
     "github.com/dnp1/conversa/server/handlers"
 )
 
-func Wrap(f func (req handlers.Context, resp handlers.JsonResponse)) gin.HandlerFunc {
+func WrapChannelContext(f func(context handlers.ChannelContext)) gin.HandlerFunc{
+    return func(c *gin.Context) {
+        f(c)
+    }
+}
+
+func WrapContext(f func (req handlers.Context, resp handlers.JsonResponse)) gin.HandlerFunc {
     return func(c *gin.Context) {
         var resp  = handlers.NewResponse()
         f(&contextAdapter{c}, resp)
