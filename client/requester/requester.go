@@ -13,23 +13,12 @@ import (
     "fmt"
 )
 
-type Error interface {
-    error
-    BadRequest() bool
-    Conflict() bool
-    Server() bool
-    NotFound() bool
-    Authorization() bool
-    Authentication() bool
-    Unexpected() bool
-}
-
 type req struct {
     urlTarget url.URL
-    client *http.Client
+    client    *http.Client
 }
 
-func New(target string, cookies []*http.Cookie) (*req, Error) {
+func New(target string, cookies []*http.Cookie) (*req, errors.Error) {
     urlTarget, err := url.ParseRequestURI(target)
     if err != nil {
         return nil, errors.Unexpected(err)
@@ -62,9 +51,9 @@ func New(target string, cookies []*http.Cookie) (*req, Error) {
     }, nil
 }
 
-func (r *req) Request(method, path string, body, resp interface {}) Error {
+func (r *req) Request(method, path string, body, respDest interface{}) errors.Error {
     var (
-        endpoint = r.urlTarget
+        endpoint   = r.urlTarget
         bodyReader io.Reader
     )
     endpoint.Path = path
@@ -80,12 +69,20 @@ func (r *req) Request(method, path string, body, resp interface {}) Error {
     req.Header.Set("Content-Type", "application/json")
     if resp, err := r.client.Do(req); err != nil {
         return errors.Unexpected(err)
-    } else if responseJs, err := ioutil.ReadAll(resp.Body); err != nil {
-        return errors.Unexpected(err)
-    } else if err := json.Unmarshal(responseJs, resp); err != nil {
-        return errors.Server(fmt.Errorf("Non json response (Code: %d)", resp.StatusCode))
-    } else if err := errors.FromHttpStatus(resp.StatusCode, "Error on request"); err != nil {
-        return err
+    } else {
+        defer resp.Body.Close()
+        if responseJs, err := ioutil.ReadAll(resp.Body); err != nil {
+            return errors.Unexpected(err)
+        } else if err := json.Unmarshal(responseJs, respDest); err != nil {
+            return errors.Server(fmt.Errorf("Non json response (Code: %d)", resp.StatusCode))
+        } else if err := errors.FromHttpStatus(resp.StatusCode, fmt.Sprintf("Error on request. %+v", respDest)); err != nil {
+            return err
+        }
     }
     return nil
+}
+
+func (r *req) Cookies() []*http.Cookie {
+    var urlPath = r.urlTarget
+    return r.client.Jar.Cookies(&urlPath)
 }

@@ -17,12 +17,12 @@ const (
 var (
     ErrRoomNameAlreadyExists = errors.Conflict(errors.FromString("Couldn't insert!"))
     ErrRoomNameWrongLength   = errors.Validation(fmt.Errorf(
-        "Model's name length is invalid, mininum is %d and maximum is %d",
+        "Room's name length is invalid, mininum is %d and maximum is %d",
         NameMinLength,
         NameMaxLength,
     ))
     ErrRoomNameHasInvalidCharacters = errors.Validation(
-        errors.FromString("Model name can only contain alphanumeric characters and underscores."))
+        errors.FromString("Room name can only contain alphanumeric characters and underscores."))
 )
 
 func New(db *sql.DB) *model {
@@ -38,7 +38,7 @@ type model struct {
 var regexpRoom = regexp.MustCompile("[a-zA-Z0-9_]")
 
 func (r *model) Create(username string, name string) errors.Error {
-    const query = `INSERT INTO "model"("name", "username", "user_id")
+    const query = `INSERT INTO "room"("name", "username", "user_id")
         SELECT $1, $2::TEXT, u.id FROM "user" u WHERE u."username" = $2
         ON CONFLICT ON CONSTRAINT "uq_name" DO NOTHING RETURNING id;
     `
@@ -59,7 +59,7 @@ func (r *model) Create(username string, name string) errors.Error {
 }
 
 func (r *model) Delete(username string, name string) errors.Error {
-    const query = `DELETE FROM "model" WHERE
+    const query = `DELETE FROM "room" WHERE
         "name"=$1 AND "username" = $2
     `
     if _, err := r.db.Exec(query, name, username); err != nil {
@@ -69,7 +69,7 @@ func (r *model) Delete(username string, name string) errors.Error {
 }
 
 func (r *model) Rename(username, oldName, newName string) errors.Error {
-    const query = `UPDATE "model" SET "name" = $3 WHERE "username"=$1 AND "name"=$2;`
+    const query = `UPDATE "room" SET "name" = $3 WHERE "username"=$1 AND "name"=$2;`
     if hasInvalidChars := !regexpRoom.MatchString(newName); hasInvalidChars {
         return ErrRoomNameHasInvalidCharacters
     }
@@ -80,7 +80,7 @@ func (r *model) Rename(username, oldName, newName string) errors.Error {
 }
 
 func (r *model) All() ([]room.Data, errors.Error) {
-    const query = `SELECT username, name FROM "model" ORDER BY "username", "name";`
+    const query = `SELECT username, name FROM "room" ORDER BY "username", "name";`
     if rows, err := r.db.Query(query); err != nil {
         return nil, errors.Internal(err)
     } else {

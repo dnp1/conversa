@@ -68,7 +68,7 @@ func Validate(username, password, passwordConfirmation string) errors.Error {
 
 func (u *model) Create(username string, password string, passwordConfirmation string) errors.Error {
     var id int64;
-    const query = `INSERT INTO "model"("username", "password") VALUES($1, $2)
+    const query = `INSERT INTO "user"("username", "password") VALUES($1, $2)
         ON CONFLICT ON CONSTRAINT "uq_username" DO NOTHING RETURNING id;`
     if err := Validate(username, password, passwordConfirmation); err != nil {
         return err

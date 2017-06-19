@@ -5,6 +5,16 @@ import (
     "net/http"
     "fmt"
 )
+type Error interface {
+    error
+    BadRequest() bool
+    Conflict() bool
+    Server() bool
+    NotFound() bool
+    Authorization() bool
+    Authentication() bool
+    Unexpected() bool
+}
 
 type myError struct {
     error

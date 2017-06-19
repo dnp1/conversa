@@ -73,13 +73,14 @@ func TestSession_Delete(t *testing.T) {
     //case 0
     {
         token := uuid.NewV4().String()
-        mock.ExpectExec(".*").WillReturnError(errors.FromString("unexpected error"))
+        mock.ExpectQuery(".*").WillReturnError(errors.FromString("unexpected error"))
         assert.Error(t, s.Delete(token))
     }
     //case 1
     {
         token := uuid.NewV4().String()
-        mock.ExpectExec(".*").WillReturnResult(sqlmock.NewResult(1, 1))
+        rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
+        mock.ExpectQuery(".*").WillReturnRows(rows)
         assert.NoError(t, s.Delete(token))
         assert.NoError(t, mock.ExpectationsWereMet())
     }

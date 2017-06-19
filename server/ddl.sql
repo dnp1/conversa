@@ -24,7 +24,7 @@ CREATE TABLE room(
     CONSTRAINT "uq_name" UNIQUE("username", "name")
 );
 
-CREATE TABLE "messages"(
+CREATE TABLE "message"(
     "id" serial PRIMARY KEY,
     "room_id" INT REFERENCES "room"("id") NOT NULL,
     "user_id" INT REFERENCES "user"("id") NOT NULL,

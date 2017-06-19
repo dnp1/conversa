@@ -22,8 +22,8 @@ type ( // dependencies
         Delete (req handlers.Context, resp handlers.JsonResponse)
         Edit (req handlers.Context, resp handlers.JsonResponse)
     }
+
     Message interface {
-        List (req handlers.Context, resp handlers.JsonResponse)
         Create (req handlers.Context, resp handlers.JsonResponse)
         Edit (req handlers.Context, resp handlers.JsonResponse)
         Delete (req handlers.Context, resp handlers.JsonResponse)
@@ -49,9 +49,8 @@ func New(handlers *Handlers) *gin.Engine {
     r.DELETE("/session",  WrapContext(handlers.Session.Logout))
 
     authenticated := r.Group("")
-    authenticated.Use(WrapContext(handlers.Authentication.Middleware)) //TODO:CheckWrap for middlewares
+    authenticated.Use(WrapMiddleware(handlers.Authentication.Middleware)) //TODO:CheckWrap for middlewares
     authenticated.GET("/room", WrapContext(handlers.Room.List))
-    authenticated.GET("/user/:user/room/:room/messages", WrapContext(handlers.Message.List))
     authenticated.GET("/user/:user/room/:room/listen", WrapChannelContext(handlers.Channel.Listen))
     authenticated.POST("/user/:user/room", WrapContext(handlers.Room.Create))
     authenticated.DELETE("/user/:user/room/:room", WrapContext(handlers.Room.Delete))

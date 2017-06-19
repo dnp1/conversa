@@ -1,5 +1,7 @@
 package client
 
+import "time"
+
 type ResponseBody struct {
     Success bool `json:"success"`
     Message string `json:"message"`
@@ -36,4 +38,16 @@ type SignUp struct {
     Username             string `json:"username"`
     Password             string `json:"password"`
     PasswordConfirmation string `json:"passwordConfirmation"`
+}
+
+
+type Message struct {
+    Event string
+    ID               string `json:"id"`
+    RoomName         string `json:"roomName"`
+    RoomUsername     string `json:"roomUsername"`
+    OwnerUsername    string `json:"ownerUsername"`
+    Content          string `json:"content"`
+    CreationDatetime time.Time `json:"creationDatetime"`
+    EditionDatetime  time.Time `json:"editionDatetime"`
 }

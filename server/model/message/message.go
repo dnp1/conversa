@@ -7,6 +7,7 @@ import (
     "github.com/dnp1/conversa/server/data/message"
     "sync"
     "time"
+    "fmt"
 )
 
 var ( //errors
@@ -16,6 +17,7 @@ var ( //errors
 func New(db *sql.DB) *model {
     return &model{
         db: db,
+        listeners: make(map[mapKey][](chan *message.EventData), 1000),
     }
 }
 
@@ -31,11 +33,12 @@ type model struct {
 }
 
 func (m *model) Create(username, roomName, senderName, content string) errors.Error {
-    const query = `INSERT INTO "model"("room_id", "user_id", "content")
+    fmt.Println(username, roomName, senderName, content)
+    const query = `INSERT INTO "message"("room_id", "user_id", "content")
     SELECT r.id, u.id, $4
         FROM room r
         LEFT JOIN "user" u ON u.username = $3
-        WHERE r.name = $1 AND r.username = $2
+        WHERE r.username = $1 AND r.name = $2
     RETURNING id, creation_datetime, edition_datetime;`
 
     var id string
@@ -59,13 +62,13 @@ func (m *model) Create(username, roomName, senderName, content string) errors.Er
     }
 
     go m.Broadcast(eventCreation, &message.Data{
-        ID:            id,
-        Content:       content,
-        OwnerUsername: senderName,
-        RoomName:      roomName,
-        RoomUsername:  username,
-        CreationDate:  creationDatetime,
-        EditionDate:   editionDatetime,
+        ID:               id,
+        Content:          content,
+        OwnerUsername:    senderName,
+        RoomName:         roomName,
+        RoomUsername:     username,
+        CreationDatetime: creationDatetime,
+        EditionDatetime:  editionDatetime,
     })
 
     return nil
@@ -83,10 +86,10 @@ func (m *model) Edit(username, roomName, messageOwner, messageID, content string
                     u.username = $3
                     AND r.name = $1 AND r.username = $2
     ) AS "t"
-    UPDATE "model" SET "content" = $5, "edition_datetime" = current_timestamp
-        WHERE "model".id = t.msg_id
-        AND model.room_id = t.room_id
-        AND model.user_id = t.user_id
+    UPDATE "message" SET "content" = $5, "edition_datetime" = current_timestamp
+        WHERE "message".id = t.msg_id
+        AND message.room_id = t.room_id
+        AND message.user_id = t.user_id
     RETURNING id, "creation_datetime", "edition_datetime"
 ;`
 
@@ -113,13 +116,13 @@ func (m *model) Edit(username, roomName, messageOwner, messageID, content string
         return errors.Internal(err)
     }
     go m.Broadcast(eventEdition, &message.Data{
-        ID:            id,
-        Content:       content,
-        OwnerUsername: messageOwner,
-        RoomName:      roomName,
-        RoomUsername:  username,
-        CreationDate:  creationDatetime,
-        EditionDate:   editionDatetime,
+        ID:               id,
+        Content:          content,
+        OwnerUsername:    messageOwner,
+        RoomName:         roomName,
+        RoomUsername:     username,
+        CreationDatetime: creationDatetime,
+        EditionDatetime:  editionDatetime,
     })
     return nil
 }
@@ -128,7 +131,7 @@ func (m *model) Delete(username, roomName, messageID, messageOwner string) error
     const query = `
     WITH (
         SELECT m.id as "msg_id", r.id as "room_id", u.id as "user_id"
-                FROM model m
+                FROM message m
                 INNER JOIN room r ON r.id = m.room_id
                 INNER JOIN "user" u ON u.id = m.user_id
                 WHERE
@@ -136,10 +139,10 @@ func (m *model) Delete(username, roomName, messageID, messageOwner string) error
                     u.username = $3
                     AND r.name = $1 AND r.username = $2
     ) AS "t"
-    DELETE FROM "model"
-        WHERE "model".id = t.msg_id
-        AND model.room_id = t.room_id
-        AND model.user_id = t.user_id
+    DELETE FROM "message"
+        WHERE "message".id = t.msg_id
+        AND message.room_id = t.room_id
+        AND message.user_id = t.user_id
     RETURNING id;`
 
     var id string
@@ -156,11 +159,6 @@ func (m *model) Delete(username, roomName, messageID, messageOwner string) error
 
     })
     return nil
-}
-
-func (m *model) All(username, roomName string, limit, offset int64) ([]message.Data, errors.Error) {
-
-    return nil, nil
 }
 
 const (

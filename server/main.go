@@ -48,7 +48,7 @@ func main() {
     router := controller.New(&controller.Handlers{
         Authentication: authenticationHandlers.New(authenticationCookieName, session),
         Message: messageHandlers.New(message),
-        Session: sessionHandlers.New(session),
+        Session: sessionHandlers.New(session, authenticationCookieName),
         Room: roomHandlers.New(room),
         User: userHandlers.New(user),
         Channel: channel.New(message),

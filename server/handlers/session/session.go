@@ -8,8 +8,8 @@ import (
 )
 
 
-func New(model Model) *handler {
-    return &handler{model: model}
+func New(model Model, cookieName string) *handler {
+    return &handler{model: model, cookieName:cookieName}
 }
 
 type Model interface {

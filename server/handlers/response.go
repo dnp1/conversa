@@ -29,10 +29,10 @@ type response struct {
 
 func (resp *response) WriteJSON(c *gin.Context) {
     if resp.err != nil {
-        c.Error(resp.err)
         if resp.message == "" {
             resp.message = resp.err.Error()
         }
+        c.Error(resp.err)
     } else {
         resp.success = true
     }
@@ -52,6 +52,7 @@ func (resp *response) WriteJSON(c *gin.Context) {
 }
 
 func (resp *response) SetError(err errors.Error) {
+    resp.err = err
     switch {
     case err.Validation():
         resp.status = http.StatusBadRequest

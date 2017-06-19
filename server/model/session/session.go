@@ -44,7 +44,7 @@ func (s *model) Create(username string, password string) (string, errors.Error) 
 }
 
 func (s *model) Delete(token string) errors.Error {
-    const query = `DELETE FROM "user_session" WHERE session_key = $1 RETURNING "id"`
+    const query = `DELETE FROM "user_session" WHERE session_key = $1 RETURNING "user_id"`
     var id int64
     if err := s.db.QueryRow(query, token).Scan(&id); err != nil {
         if err == sql.ErrNoRows {

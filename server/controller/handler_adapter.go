@@ -14,7 +14,15 @@ func WrapChannelContext(f func(context handlers.ChannelContext)) gin.HandlerFunc
         f(c)
     }
 }
-
+func WrapMiddleware(f func (req handlers.Context, resp handlers.JsonResponse)) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var resp  = handlers.NewResponse()
+        f(&contextAdapter{c}, resp)
+        if c.IsAborted() {
+            resp.WriteJSON(c)
+        }
+    }
+}
 func WrapContext(f func (req handlers.Context, resp handlers.JsonResponse)) gin.HandlerFunc {
     return func(c *gin.Context) {
         var resp  = handlers.NewResponse()
