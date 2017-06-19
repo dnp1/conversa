@@ -55,7 +55,7 @@ func Internal(err error) *myError {
     return &myError{error: err, internal: true}
 }
 func Empty(err error) *myError {
-    return &myError{empty: true}
+    return &myError{error: err, empty: true}
 }
 func Authorization(err error) *myError {
     return &myError{error: err, authorization: true}

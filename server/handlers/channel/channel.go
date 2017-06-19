@@ -31,7 +31,6 @@ func (handler *handler) Listen(context handlers.ChannelContext) {
     defer handler.model.StopListening(username, roomName, listener)
     context.Stream(
         func(w io.Writer) bool {
-
             event := <-listener
             context.SSEvent(event.Event, event.Data)
             return true

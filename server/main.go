@@ -59,7 +59,7 @@ func main() {
     srv := &http.Server{
         Addr:              fmt.Sprintf("%s:%s", host, port),
         ReadTimeout:       60 * time.Second,
-        WriteTimeout:      60 * time.Second,
+        WriteTimeout:      60 * time.Minute,
         ReadHeaderTimeout: 10 * time.Second,
         MaxHeaderBytes:    1 << 11,
         Handler:           router,

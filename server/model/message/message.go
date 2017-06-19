@@ -7,7 +7,6 @@ import (
     "github.com/dnp1/conversa/server/data/message"
     "sync"
     "time"
-    "fmt"
 )
 
 var ( //errors
@@ -33,7 +32,6 @@ type model struct {
 }
 
 func (m *model) Create(username, roomName, senderName, content string) errors.Error {
-    fmt.Println(username, roomName, senderName, content)
     const query = `INSERT INTO "message"("room_id", "user_id", "content")
     SELECT r.id, u.id, $4
         FROM room r
@@ -202,6 +200,7 @@ func (m *model) StopListening(username, roomName string, ch <-chan *message.Even
     for k, v := range list {
         if v == ch {
             list = append(list[:k], list[k+1:]...)
+            m.listeners[key] = list
             close(v)
             break
         }

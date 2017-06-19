@@ -43,7 +43,7 @@ func (ui *ChatUi) Init() {
 
 func (ui *ChatUi) ReceiveMessage(user string, message string, editedOn time.Time) {
     ui.gui.Execute(func(*gocui.Gui) error {
-        fmt.Fprintf(ui.viewMessages, "(%s) %s:\n\t\t%s\n", editedOn.String(), user, message)
+        fmt.Fprintf(ui.viewMessages, "(%s) %s:\n\t%s\n", editedOn.String(), user, message)
         return nil
     })
 }
@@ -128,6 +128,8 @@ func (ui *ChatUi) Editor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifi
     case gocui.KeyEnter:
         ui.Actions.MessageCreate(ui.Username, ui.RoomName, v.ViewBuffer())
         v.Clear()
+        v.SetOrigin(0,0)
+        v.SetCursor(0,0)
     default:
         gocui.DefaultEditor.Edit(v, key, ch, mod)
     }

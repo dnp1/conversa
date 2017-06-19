@@ -37,15 +37,14 @@ func New(target string, cookies []*http.Cookie) (*req, errors.Error) {
         urlTarget: *urlTarget,
         client: &http.Client{
             Transport: &http.Transport{
-                TLSHandshakeTimeout:    15 * time.Second,
-                ResponseHeaderTimeout:  30 * time.Second,
+                TLSHandshakeTimeout:    2 * time.Minute,
                 MaxIdleConnsPerHost:    1000,
                 MaxIdleConns:           4096,
                 MaxResponseHeaderBytes: 1024,
-                IdleConnTimeout:        2 * time.Minute,
-                ExpectContinueTimeout:  30 * time.Second,
+                IdleConnTimeout:        10 * time.Minute,
+                ExpectContinueTimeout:  90 * time.Second,
             },
-            Timeout: 90 * time.Second,
+            Timeout: 60 * time.Minute,
             Jar:     jar,
         },
     }, nil

@@ -16,7 +16,6 @@ import (
     "github.com/dnp1/conversa/client"
     "github.com/dnp1/conversa/client/errors"
     "github.com/dnp1/conversa/cli/ui"
-    "time"
 )
 
 func getConfigFilePath() string {
@@ -78,9 +77,8 @@ type Api interface {
     RoomRemove(name string) errors.Error
     SignUp(username, password, passwordConfirmation string) errors.Error
     MessageCreate(user, room, content string) errors.Error
-    Listen(user, room string, ch chan <- *client.Message, errCh chan <- errors.Error)
+    Listen(user, room string, ch chan<- *client.Message, errCh chan<- errors.Error)
 }
-
 
 func main() {
     var api Api
@@ -90,7 +88,7 @@ func main() {
     } else if data, err := handleConf(); err != nil {
         log.Println(err)
         return
-    } else{
+    } else {
         cl, err := client.New(target, data)
         if err != nil {
             log.Println(err)
@@ -104,15 +102,15 @@ func main() {
     app.Version = "1.0.0"
     app.Authors = []cli.Author{
         {
-            Name:  "Danilo A.N.P",
+            Name: "Danilo A.N.P",
         },
     }
     app.EnableBashCompletion = true
 
     app.Commands = []cli.Command{
         {
-            Name:    "login",
-            Flags:[]cli.Flag{
+            Name: "login",
+            Flags: []cli.Flag{
                 cli.StringFlag{
                     Name:  "user, u",
                     Usage: "-u `username`",
@@ -122,8 +120,8 @@ func main() {
                     Usage: "-p  `password`",
                 },
             },
-            Usage:   "Login in server",
-            Action:  func(c *cli.Context) error {
+            Usage: "Login in server",
+            Action: func(c *cli.Context) error {
                 var (
                     username string = c.String("user")
                     password string = c.String("password")
@@ -147,9 +145,9 @@ func main() {
             },
         },
         {
-            Name:    "logout",
-            Usage:   "Logout from server",
-            Action:  func(c *cli.Context) error {
+            Name:  "logout",
+            Usage: "Logout from server",
+            Action: func(c *cli.Context) error {
                 if err := api.Logout(); err != nil {
                     return cli.NewMultiError(err)
                 } else {
@@ -163,9 +161,9 @@ func main() {
             },
         },
         {
-            Name:    "sign-up",
-            Usage:   "Create user account",
-            Flags:[]cli.Flag{
+            Name:  "sign-up",
+            Usage: "Create user account",
+            Flags: []cli.Flag{
                 cli.StringFlag{
                     Name:  "user, u",
                     Usage: "-u `username`",
@@ -179,10 +177,10 @@ func main() {
                     Usage: "-c `confirmation`",
                 },
             },
-            Action:  func(c *cli.Context) error {
+            Action: func(c *cli.Context) error {
                 var (
-                    username string = c.String("user")
-                    password string = c.String("password")
+                    username             string = c.String("user")
+                    password             string = c.String("password")
                     passwordConfirmation string = c.String("password")
                 )
 
@@ -205,15 +203,15 @@ func main() {
             },
         },
         {
-            Name: "room-list",
+            Name:  "room-list",
             Usage: "[-u `username`]",
-            Flags:[]cli.Flag{
+            Flags: []cli.Flag{
                 cli.StringFlag{
                     Name:  "user, u",
                     Usage: "-u `username`",
                 },
             },
-            Action:  func(c *cli.Context) error {
+            Action: func(c *cli.Context) error {
                 var err errors.Error
                 var data []client.RoomItem
 
@@ -237,15 +235,15 @@ func main() {
             },
         },
         {
-            Name: "room-create",
+            Name:  "room-create",
             Usage: "-n name",
-            Flags:[]cli.Flag{
+            Flags: []cli.Flag{
                 cli.StringFlag{
                     Name:  "name, n",
                     Usage: "-n [name]",
                 },
             },
-            Action:  func(c *cli.Context) error {
+            Action: func(c *cli.Context) error {
                 var name = c.String("name")
                 if name == "" {
                     name = readString("Room")
@@ -262,15 +260,15 @@ func main() {
             },
         },
         {
-            Name: "room-remove",
+            Name:  "room-remove",
             Usage: "-n `name`",
-            Flags:[]cli.Flag{
+            Flags: []cli.Flag{
                 cli.StringFlag{
                     Name:  "name, n",
                     Usage: "-n `name`",
                 },
             },
-            Action:  func(c *cli.Context) error {
+            Action: func(c *cli.Context) error {
                 var name = c.String("name")
                 if name == "" {
                     name = readString("Room name")
@@ -289,9 +287,9 @@ func main() {
             },
         },
         {
-            Name: "join-room",
+            Name:  "join-room",
             Usage: "-u username -n roomname",
-            Flags:[]cli.Flag{
+            Flags: []cli.Flag{
                 cli.StringFlag{
                     Name:  "name, n",
                     Usage: "-n `name`",
@@ -301,7 +299,7 @@ func main() {
                     Usage: "-u `username`",
                 },
             },
-            Action:  func(c *cli.Context) error {
+            Action: func(c *cli.Context) error {
                 var username = c.String("user")
                 if username == "" {
                     username = readString("Username")
@@ -314,33 +312,35 @@ func main() {
                 i := ui.ChatUi{
                     Username: username,
                     RoomName: name,
-                    Actions:api,
+                    Actions:  api,
                 }
 
                 ch := make(chan *client.Message)
                 errCh := make(chan errors.Error)
                 go api.Listen(username, name, ch, errCh)
-                go i.Init()
-                for {
-                    select {
-                        case msg, ok := <- ch:
-                            if !ok {
-                                return nil
+
+                go func() {
+                    for {
+                        select {
+                        case msg, ok := <-ch:
+                             if !ok {
+                                return
                             }
-                            if msg.Event == "creation" {
-                                i.ReceiveMessage(msg.OwnerUsername, msg.Content, msg.EditionDatetime)
-                            }
-                        case err, ok  := <- errCh:
+
+                            i.ReceiveMessage(msg.OwnerUsername, msg.Content, msg.EditionDatetime)
+
+
+                        case err, ok := <-errCh:
                             if ok {
                                 i.Close(err)
                                 log.Println(err)
                             }
-                            return err
+                            return
+                        }
                     }
-                    time.Sleep(100 * time.Millisecond)
-                }
+                }()
 
-
+                i.Init()
 
                 return nil
             },
