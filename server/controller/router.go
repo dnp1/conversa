@@ -45,7 +45,7 @@ func New(handlers *Handlers) *gin.Engine {
     r.DELETE("/session",  Wrap(handlers.Session.Logout))
 
     authenticated := r.Group("")
-    authenticated.Use(Wrap(handlers.Authentication.Middleware))
+    authenticated.Use(Wrap(handlers.Authentication.Middleware)) //TODO:CheckWrap for middlewares
     authenticated.GET("/room", Wrap(handlers.Room.List))
     authenticated.GET("/user/:user/room/:room/messages", Wrap(handlers.Message.List))
     authenticated.POST("/user/:user/room", Wrap(handlers.Room.Create))
@@ -54,7 +54,6 @@ func New(handlers *Handlers) *gin.Engine {
     authenticated.POST("/user/:user/room/:room/message", Wrap(handlers.Message.Create))
     authenticated.PATCH("/user/:user/room/:room/message/:message", Wrap(handlers.Message.Edit))
     authenticated.DELETE("/user/:user/room/:room/message/:message", Wrap(handlers.Message.Delete))
-
     return r
 }
 
